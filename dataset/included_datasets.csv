@@ -1,0 +1,9 @@
+Dataset,Source,Original Rows,Rows After Standardization,Included in Merge,Text Column (Original),Label Column (Original),Label Types,Notes
+cyberbullying_cleaned_indo.csv,Kaggle,2400,2391,Yes,clean_text,cyberbullying_type,"age, ethnicity, gender, not_cyberbullying, other_cyberbullying, religion",Machine-translated from English. Labels mapped to: harassment/hate_speech/normal/insult
+"hatespeech & abusive/data.csv",Kaggle,13169,13169,Yes,Tweet,"HS, Abusive, HS_* subcategories","HS=0/1, Abusive=0/1, subcategories",Native Indonesian tweets. Labels derived from binary flags → normal/insult/hate_speech/threat/harassment
+indotoxic2024_annotated_data_v2_final.csv,Kaggle,28448,28447,Yes,text,"toxicity, insults, threat, identity_attack, profanity, sexually_explicit","Multi-annotator binary annotations",Native Indonesian. Annotator disagreements resolved via majority vote. Labels derived by priority.
+combined_dataset.csv,Kaggle,2066,N/A,No (DELETED),String,Label,"positif, negatif, positive, negative, Bullying, Non-bullying",Sentiment analysis dataset. Not cyberbullying type classification. Deleted.
+"hatespeech & abusive/re_dataset.csv",Kaggle,13169,N/A,No (DELETED),Tweet,"HS, Abusive","Same as data.csv",Exact byte-identical duplicate of data.csv. Deleted.
+"hatespeech & abusive/abusive.csv",Kaggle,125,N/A,No (Support File),ABUSIVE,N/A,N/A,Abusive word list. Support file for preprocessing.
+"hatespeech & abusive/new_kamusalay.csv",Kaggle,15166,N/A,No (Support File),Column1,Column2,N/A,Slang/alay normalization dictionary. Support file.
+kamus_singkatan.csv,Kaggle,1503,N/A,No (Support File),singkatan,asli,N/A,Abbreviation dictionary. Support file.

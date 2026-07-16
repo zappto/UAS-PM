@@ -1,0 +1,13 @@
+{
+  "naive_bayes": {
+    "alpha": 0.1
+  },
+  "logistic_regression": {
+    "C": 10.0,
+    "max_iter": 500,
+    "solver": "lbfgs"
+  },
+  "svm": {
+    "C": 1.0
+  }
+}

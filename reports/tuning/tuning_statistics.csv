@@ -1,0 +1,4 @@
+model_name,best_score,best_params,n_candidates,n_cv_iterations,duration_seconds
+NaiveBayes,0.421576,{'alpha': 0.1},5,25,3.4416
+LogisticRegression,0.464396,"{'C': 10.0, 'max_iter': 500, 'solver': 'lbfgs'}",12,60,91.8624
+SVM,0.464451,{'C': 1.0},5,25,1485.5822

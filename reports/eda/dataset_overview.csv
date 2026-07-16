@@ -1,0 +1,8 @@
+metric,value
+total_rows,41556
+total_columns,2
+memory_mb,26.25
+duplicate_count,0
+duplicate_percentage,0.0
+dtype_text,str
+dtype_label,str

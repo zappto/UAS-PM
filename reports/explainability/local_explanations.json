@@ -1,0 +1,87 @@
+{
+    "predicted_class_index": 3,
+    "positive_features": [
+        {
+            "feature": "kacamata",
+            "score": 0.3700650076070813
+        },
+        {
+            "feature": "israel",
+            "score": 0.2645108282835457
+        },
+        {
+            "feature": "ttg",
+            "score": 0.17174254992347424
+        },
+        {
+            "feature": "religion",
+            "score": 0.1626527610699986
+        },
+        {
+            "feature": "think",
+            "score": 0.1552861453970433
+        },
+        {
+            "feature": "netral",
+            "score": 0.15032720976830075
+        },
+        {
+            "feature": "palestina",
+            "score": 0.1427052794067506
+        },
+        {
+            "feature": "bias",
+            "score": 0.0871937739099115
+        },
+        {
+            "feature": "isu",
+            "score": 0.06199995436199346
+        },
+        {
+            "feature": "the",
+            "score": 0.032904768952870145
+        }
+    ],
+    "negative_features": [
+        {
+            "feature": "argumen",
+            "score": -0.5795106489010458
+        },
+        {
+            "feature": "ppl",
+            "score": -0.2775362299250373
+        },
+        {
+            "feature": "why",
+            "score": -0.27713190085658607
+        },
+        {
+            "feature": "bicara",
+            "score": -0.26817652250818813
+        },
+        {
+            "feature": "speak",
+            "score": -0.2515152598078964
+        },
+        {
+            "feature": "jajah",
+            "score": -0.2323034311814514
+        },
+        {
+            "feature": "world",
+            "score": -0.0938381762437706
+        },
+        {
+            "feature": "of",
+            "score": -0.0878193237506702
+        },
+        {
+            "feature": "regardless",
+            "score": -0.06522167834541046
+        },
+        {
+            "feature": "about",
+            "score": -0.060977275906091706
+        }
+    ]
+}
