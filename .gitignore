@@ -1,65 +1,47 @@
-# Python
-__pycache__/
-*.py[cod]
-*.pyo
-*.pyd
+# Ignore everything
+*
 
-# Virtual Environment
-venv/
-.venv/
-env/
+# Don't ignore docs
+!docs/
+!docs/context.md
+!docs/prd.md
+!docs/trd.md
+!docs/data-requirements.md
+!docs/model-requirements.md
+!docs/deployment.md
+!docs/architecture.md
 
-# Jupyter
-.ipynb_checkpoints/
-
-# VSCode
-.vscode/
-.idea/
-
-# Mac/Linux
-.DS_Store
-Thumbs.db
-
-# Python cache
-.pytest_cache/
-.mypy_cache/
-
-# Model Files
-models/*.joblib
-models/*.pkl
-models/*.pickle
-models/*.onnx
-models/*.h5
-models/*.keras
-
-# Vectorizer
-models/*vectorizer*
-
-# Dataset
-dataset/raw/*
-dataset/processed/*
-
+# Don't ignore dataset
+!dataset/
+!dataset/README.md
+!dataset/sample_dataset.csv
+!dataset/raw/
 !dataset/raw/.gitkeep
+!dataset/processed/
 !dataset/processed/.gitkeep
 
-# Reports
-reports/**
+# Don't ignore models
+!models/
+!models/README.md
 
+# Don't ignore notebooks
+!notebooks/
+!notebooks/*.ipynb
+
+# Don't ignore src
+!src/
+!src/**
+
+# Don't ignore streamlit
+!streamlit/
+!streamlit/**
+
+# Don't ignore reports
+!reports/
 !reports/README.md
 
-# SHAP
-*.npy
-
-# Logs
-*.log
-
-# Temporary
-tmp/
-temp/
-
-# Streamlit cache
-.streamlit/cache/
-
-# Build
-dist/
-build/
+# Don't ignore root files
+!requirements.txt
+!README.md
+!.gitignore
+!LICENSE
