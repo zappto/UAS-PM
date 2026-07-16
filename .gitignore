@@ -1,0 +1,65 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+
+# Virtual Environment
+venv/
+.venv/
+env/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# VSCode
+.vscode/
+.idea/
+
+# Mac/Linux
+.DS_Store
+Thumbs.db
+
+# Python cache
+.pytest_cache/
+.mypy_cache/
+
+# Model Files
+models/*.joblib
+models/*.pkl
+models/*.pickle
+models/*.onnx
+models/*.h5
+models/*.keras
+
+# Vectorizer
+models/*vectorizer*
+
+# Dataset
+dataset/raw/*
+dataset/processed/*
+
+!dataset/raw/.gitkeep
+!dataset/processed/.gitkeep
+
+# Reports
+reports/**
+
+!reports/README.md
+
+# SHAP
+*.npy
+
+# Logs
+*.log
+
+# Temporary
+tmp/
+temp/
+
+# Streamlit cache
+.streamlit/cache/
+
+# Build
+dist/
+build/
