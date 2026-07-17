@@ -1,0 +1,4 @@
+model_name,sklearn_class,training_samples,n_features,training_time_seconds,is_trained,random_state
+NaiveBayes,MultinomialNB,33244,22695,0.0829,True,42
+LogisticRegression,LogisticRegression,33244,22695,13.1168,True,42
+SVM,CalibratedClassifierCV,33244,22695,526.2801,True,42

@@ -1,0 +1,7 @@
+,harassment,hate_speech,insult,normal,sexually_explicit,threat
+harassment,137,20,10,85,0,0
+hate_speech,12,917,38,488,0,1
+insult,23,109,196,347,1,2
+normal,7,174,39,5473,0,0
+sexually_explicit,0,0,2,12,4,0
+threat,2,21,13,171,0,8

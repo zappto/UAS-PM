@@ -1,47 +1,24 @@
-# Ignore everything
-*
+# Python virtual environment
+.venv/
+venv/
+env/
 
-# Don't ignore docs
-!docs/
-!docs/context.md
-!docs/prd.md
-!docs/trd.md
-!docs/data-requirements.md
-!docs/model-requirements.md
-!docs/deployment.md
-!docs/architecture.md
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
 
-# Don't ignore dataset
-!dataset/
-!dataset/README.md
-!dataset/sample_dataset.csv
-!dataset/raw/
-!dataset/raw/.gitkeep
-!dataset/processed/
-!dataset/processed/.gitkeep
+# Large generated files (>100MB)
+reports/explainability/raw/shap_values.npy
 
-# Don't ignore models
-!models/
-!models/README.md
+# OS files
+.DS_Store
+Thumbs.db
 
-# Don't ignore notebooks
-!notebooks/
-!notebooks/*.ipynb
+# IDE
+.vscode/
+.idea/
 
-# Don't ignore src
-!src/
-!src/**
-
-# Don't ignore streamlit
-!streamlit/
-!streamlit/**
-
-# Don't ignore reports
-!reports/
-!reports/README.md
-
-# Don't ignore root files
-!requirements.txt
-!README.md
-!.gitignore
-!LICENSE
+# Jupyter checkpoints
+.ipynb_checkpoints/
