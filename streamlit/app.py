@@ -324,8 +324,15 @@ def render_prediction():
                 
                 pred_label_idx = exp.available_labels()[0]
                 
-                # Render HTML LIME in Streamlit
-                components.html(exp.as_html(), height=350, scrolling=True)
+                # Render HTML LIME in Streamlit (Fix Dark Mode Readability)
+                raw_html = exp.as_html()
+                # Inject CSS to force white background and black text inside the iframe
+                if "</head>" in raw_html:
+                    raw_html = raw_html.replace("</head>", "<style>body { background-color: white !important; color: black !important; padding: 20px; border-radius: 8px; }</style></head>")
+                else:
+                    raw_html = f"<div style='background-color: white !important; color: black !important; padding: 20px; border-radius: 8px;'>{raw_html}</div>"
+                    
+                components.html(raw_html, height=350, scrolling=True)
                 
                 st.markdown("#### Fitur yang Berkontribusi terhadap Prediksi")
                 word_weights = exp.as_list(label=pred_label_idx)
