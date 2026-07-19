@@ -127,19 +127,41 @@ Pendekatan LIME (Local Interpretable Model-agnostic Explanations) diimplementasi
 
 <br><br>
 
-## BAB V: KESIMPULAN DAN SARAN
+## BAB V: KELEBIHAN DAN KEKURANGAN SISTEM
 
-### 5.1 Kesimpulan
-Penelitian ini sukses membangun *pipeline* pendeteksi *cyberbullying* yang robust pada arsitektur matriks berdimensi masif. Penggabungan antara ekstraksi **TF-IDF N-grams** dan **Lexicon Tagging** terbukti sukses memperkuat representasi matriks *sparse*. Dalam kompetisi komputasi, algoritma **Linear SVM** dinobatkan sebagai pemenang karena kemampuannya menghitung *hyperplane* pembatas antar kelas-kelas teks perundungan dan meraih skor tertinggi pada batas *F1-Macro*.
+Berdasarkan evaluasi arsitektur dan kapabilitas *Machine Learning*, berikut adalah analisis komprehensif (SWOT) dari sistem yang telah dibangun:
 
-### 5.2 Saran (Rekomendasi Pengembangan Lanjutan)
-Untuk mengelevasi limitasi performa saat ini pada penelitian mendatang, kami merekomendasikan:
-1. **Transisi ke Arsitektur Deep Learning**: Menggeser mesin hitung frekuensi kata (TF-IDF) menuju pemahaman konseptual dengan *Large Language Model* berbahasa Indonesia, seperti **IndoBERT**.
-2. **Implementasi SMOTE**: Menggunakan *Synthetic Minority Over-sampling Technique* (SMOTE) jika infrastruktur keras (*Hardware RAM*) memadai, guna secara artifisial menyeimbangkan populasi pada kelas perundungan ekstrem (*Threat* dan *Abusive*).
+### 5.1 Kelebihan Sistem (Strengths)
+1. **Injeksi Pengetahuan (Lexicon Integration):**  
+   Pendekatan hibrida yang menyuntikkan kamus leksikon (Sastrawi dan korpus pelecehan) berhasil mengatasi kelemahan mendasar dari model statistik murni (TF-IDF) yang secara teknis buta terhadap konteks sentimen lokal dan bahasa gaul.
+2. **Efisiensi Komputasi (Resource Friendly):**  
+   Sistem dioptimalkan secara mutlak untuk menekan kebocoran memori (RAM) melalui pembatasan matriks fitur TF-IDF (maksimal 60.000) dan penjadwalan komputasi CPU paralel. Model ini beroperasi dengan sangat ringan dan efisien, sehingga dapat disebarluaskan pada arsitektur perangkat keras standar (*Consumer-grade hardware*).
+3. **Transparansi Absolut (White-box Model):**  
+   Penerapan LIME (*Local Interpretable Model-agnostic Explanations*) mengeliminasi stigma *'Black Box'* pada sistem *Artificial Intelligence*. Keputusan model dapat divalidasi dan dipertanggungjawabkan secara logis, yang merupakan syarat krusial untuk regulasi moderasi konten.
+
+### 5.2 Kekurangan Sistem (Limitations)
+1. **Kelemahan Semantik Berurutan (Bag-of-Words Limits):**  
+   Oleh karena sistem beroperasi di atas kerangka matematis TF-IDF, model menghitung probabilitas kata tanpa memperhatikan urutan tata bahasanya. Akibatnya, model masih memiliki kerentanan (*vulnerability*) saat menghadapi sarkasme tingkat tinggi atau kalimat majemuk berstruktur kompleks.
+2. **Ketergantungan Kamus Statis:**  
+   Kepekaan heuristik model sangat bergantung pada pembaruan leksikon eksternal secara berkesinambungan. Jika pengguna internet memanufaktur variasi kosakata kasar atau *slang* baru, model AI ini tidak dapat mempelajarinya secara intuitif tanpa intervensi data secara manual.
+3. **Sensitivitas Inferensi Kelas Minoritas:**  
+   Meskipun algoritma *Linear SVM* telah beroperasi secara prima untuk meredam ketidakseimbangan kelas (*Imbalance*), pendeteksian kategori dengan populasi sampel latih yang teramat kecil (seperti ancaman fisik/*Threat*) masih menjadi tantangan akurasi secara matematis.
 
 <br><br>
 
-## BAB VI: STRUKTUR REPOSITORI & DEPLOYMENT
+## BAB VI: KESIMPULAN DAN SARAN
+
+### 6.1 Kesimpulan
+Penelitian ini sukses membangun *pipeline* pendeteksi *cyberbullying* yang handal pada arsitektur matriks berdimensi masif. Penggabungan antara ekstraksi **TF-IDF N-grams** dan **Lexicon Tagging** terbukti sukses memperkuat representasi matriks *sparse*. Dalam evaluasi objektif, algoritma **Linear SVM** dinobatkan sebagai arsitektur paling presisi karena kemampuannya mempertahankan titik ekuilibrium klasifikasi dan meraih skor tertinggi pada batas *F1-Macro* sebesar 66.87%.
+
+### 6.2 Saran (Rekomendasi Pengembangan Lanjutan)
+Untuk mengelevasi limitasi komputasi saat ini pada ruang lingkup mendatang, kami merekomendasikan:
+1. **Transisi ke Arsitektur Deep Learning**: Menggeser mesin hitung frekuensi kata (TF-IDF) menuju pemahaman konseptual (*Word Embeddings*) dengan memanfaatkan *Large Language Model* berbahasa Indonesia, seperti **IndoBERT**.
+2. **Implementasi SMOTE**: Mengaplikasikan *Synthetic Minority Over-sampling Technique* (SMOTE) guna secara artifisial mereplikasi populasi kelas perundungan ekstrem, guna mengatasi isu minimnya data *Threat* dan *Abusive*.
+
+<br><br>
+
+## BAB VII: STRUKTUR REPOSITORI & DEPLOYMENT
 
 Proyek ini telah dikemas menjadi antarmuka web interaktif yang transparan, memungkinkan pengguna menguji teks apa pun secara seketika (*live preview*) dengan interpretasi algoritma otak AI.
 

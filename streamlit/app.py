@@ -539,9 +539,36 @@ def render_explainability():
         st.info("Global word visualization not available. Run `11_explainability.ipynb`.")
 
 def render_about():
-    st.title("ℹ️ About the Research")
+    st.title("ℹ️ About & System Analysis")
+    st.markdown("Proyek ini merepresentasikan perpaduan komprehensif antara rekayasa fitur (*Feature Engineering*) klasik dan teknik transparansi kecerdasan buatan (*Explainable AI*).")
     st.markdown("---")
-    st.markdown("This project strictly adheres to a classical Machine Learning NLP pipeline using TF-IDF.")
+    
+    st.header("Kelebihan dan Kekurangan Sistem")
+    st.markdown("Berdasarkan evaluasi arsitektur dan hasil performa, berikut adalah analisis objektif mengenai kapabilitas sistem ini:")
+    
+    col_pro, col_con = st.columns(2)
+    
+    with col_pro:
+        st.success("### ✅ Kelebihan (Strengths)")
+        st.markdown("""
+        1. **Injeksi Pengetahuan (Lexicon Integration):**  
+           Pendekatan hibrida yang menyuntikkan kamus leksikon (Sastrawi & kamus pelecehan) berhasil mengatasi kelemahan mendasar dari model statistik (TF-IDF) yang pada dasarnya buta terhadap sentimen lokal/bahasa gaul.
+        2. **Efisiensi Komputasi (Resource Friendly):**  
+           Sistem dioptimalkan untuk menekan kebocoran memori (RAM) melalui pembatasan fitur TF-IDF (maks. 60.000) dan utilitas CPU (*GridSearch `n_jobs`*). Model ini sangat ringan dan cepat dieksekusi bahkan pada perangkat keras standar.
+        3. **Transparansi Absolut (White-box Model):**  
+           Penerapan LIME (Local Interpretable Model-agnostic Explanations) mengeliminasi stigma *'Black Box'* pada AI. Setiap keputusan prediksi dapat dilacak kembali ke probabilitas kata per kata.
+        """)
+        
+    with col_con:
+        st.error("### ❌ Kekurangan (Limitations)")
+        st.markdown("""
+        1. **Kelemahan Semantik Terstruktur (Bag-of-Words):**  
+           Berbasis TF-IDF, model ini menghitung frekuensi kata terlepas dari urutannya. Akibatnya, model masih rentan terhadap sarkasme tingkat tinggi atau ambiguitas kalimat panjang yang bergantung pada urutan subjek-predikat.
+        2. **Ketergantungan Kamus Statis:**  
+           Kecerdasan model dalam mendeteksi ancaman baru sangat bergantung pada leksikon (kamus) statis. Jika muncul varian bahasa *slang* baru di internet, model tidak dapat beradaptasi secara otomatis tanpa pembaruan kamus manual.
+        3. **Sensitivitas Kelas Minoritas (Threat):**  
+           Walaupun algoritma *Linear SVM* berhasil mengoptimalkan keseimbangan *F1-Macro*, mendeteksi kelas yang populasinya sangat langka (seperti ancaman pembunuhan/fisik) tetap menjadi tantangan heuristik tersendiri karena minimnya sampel latih.
+        """)
 
 # ==========================================
 # 4. APP ROUTING
@@ -557,7 +584,7 @@ def main():
         "🔮 Prediction & XAI": render_prediction,
         "🕵️ Error Analysis": render_error_analysis,
         "🧠 Global Explainability": render_explainability,
-        "ℹ️ About the Research": render_about
+        "ℹ️ About & System Analysis": render_about
     }
     
     selection = st.sidebar.radio("Go to", list(pages.keys()))
