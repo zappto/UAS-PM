@@ -200,10 +200,33 @@ def render_home():
 def render_eda():
     st.title("📊 Exploratory Data Analysis (EDA)")
     st.markdown("---")
+    
+    st.markdown("""
+    Analisis data eksploratif ini menyoroti karakteristik asli dataset, termasuk distribusi kelas yang tidak seimbang (*Class Imbalance*) dan distribusi panjang kata yang diketik oleh pengguna internet berbahasa Indonesia.
+    """)
+    
+    col1, col2 = st.columns(2)
+    with col1:
+        st.subheader("Distribusi Kelas (Class Imbalance)")
+        try:
+            img1 = Image.open(BASE_REPORTS_DIR / "eda" / "class_distribution.png")
+            st.image(img1, use_column_width=True)
+        except Exception:
+            st.info("Gambar class_distribution.png belum tersedia.")
+            
+    with col2:
+        st.subheader("Distribusi Panjang Kata")
+        try:
+            img2 = Image.open(BASE_REPORTS_DIR / "eda" / "word_length_distribution.png")
+            st.image(img2, use_column_width=True)
+        except Exception:
+            st.info("Gambar word_length_distribution.png belum tersedia.")
+
+    st.markdown("---")
+    st.subheader("Sampel Data Mentah")
     df_train = load_csv(TFIDF_DIR / "train_metadata.csv")
     if df_train is not None:
-        st.success(f"Dataset active. Training samples: {len(df_train):,}")
-        st.dataframe(df_train.head(5))
+        st.dataframe(df_train.head(10))
     else:
         st.info("EDA Artifacts are currently being processed or unavailable.")
 
@@ -211,23 +234,44 @@ def render_performance():
     st.title("📈 Model Performance & Evaluation")
     st.markdown("---")
     meta = load_model_selection_meta()
+    
     if not meta:
         st.warning("Evaluation artifacts not found. Run `09_model_evaluation.ipynb` first.")
         return
         
+    st.markdown("### 🏆 Champion Model")
     col1, col2 = st.columns(2)
     with col1:
-        st.metric("Model Name", meta.get('selected_model', 'Unknown'))
+        st.success(f"**Model Name:** {meta.get('selected_model', 'Unknown')}")
     with col2:
         f1 = meta.get('final_metrics', {}).get('f1_score', 0)
-        st.metric("Test F1-Macro Score", f"{f1:.4f}")
+        st.success(f"**Test F1-Macro Score:** {f1:.4f}")
+        
+    st.info(f"**Alasan Pemilihan:** {meta.get('reason', 'Tidak ada data')}")
         
     st.markdown("---")
+    st.subheader("Leaderboard Algoritma")
     eval_df = load_csv(BASE_REPORTS_DIR / "model_evaluation" / "model_evaluation_results.csv")
     if eval_df is not None:
-        st.dataframe(eval_df.style.highlight_max(subset=['F1_Macro', 'Accuracy'], color='lightgreen'))
+        st.dataframe(eval_df.style.highlight_max(subset=['F1-Score', 'Accuracy'], color='lightgreen'), use_container_width=True)
+        
+        # Plot comparison
+        st.subheader("Grafik Perbandingan F1-Score")
+        fig, ax = plt.subplots(figsize=(10, 5))
+        sns.barplot(x='F1-Score', y='Model', data=eval_df.sort_values('F1-Score', ascending=False), palette='magma', ax=ax)
+        ax.set_title("Komparasi F1-Macro antar Model")
+        st.pyplot(fig)
     else:
         st.info("Comparison leaderboard not available.")
+        
+    st.markdown("---")
+    st.subheader("Confusion Matrix (Model Terbaik)")
+    try:
+        best_model_name = meta.get('selected_model', 'linear_svm_baseline')
+        img_cm = Image.open(BASE_REPORTS_DIR / f"confusion_matrix_{best_model_name}.png")
+        st.image(img_cm, width=700)
+    except Exception:
+        st.info("Confusion Matrix tidak ditemukan.")
 
 def render_prediction():
     st.title("🔬 Text Analysis & Prediction")
