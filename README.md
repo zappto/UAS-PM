@@ -4,7 +4,13 @@
 
 ---
 
-## 1. Problem Statement & Latar Belakang
+## 1. Ringkasan Eksekutif (Executive Summary)
+
+Proyek ini adalah implementasi *Machine Learning Pipeline* tingkat lanjut yang berfokus pada analisis teks bahasa Indonesia (NLP). Secara khusus, proyek ini mendeteksi dan mengklasifikasikan jenis perundungan siber (*Cyberbullying*). Dengan memanfaatkan teknik ekstraksi fitur TF-IDF yang diperkuat oleh **Lexicon Tagging** (Kamus Sentimen), kami berhasil membangun ruang *hyperplane* linear untuk mengisolasi kalimat-kalimat agresif dengan akurasi yang tinggi. Proyek ini membandingkan kinerja algoritma *Logistic Regression*, *Linear SVM*, dan *XGBoost*, di mana **Linear SVM** keluar sebagai model paling tangguh.
+
+---
+
+## 2. Latar Belakang & Problem Statement
 
 Perkembangan pesat media sosial dan platform komunikasi digital telah mempermudah masyarakat untuk berinteraksi dan berbagi pendapat. Namun, hal ini juga memicu peningkatan perilaku daring yang negatif, salah satunya adalah perundungan dunia maya (*cyberbullying*).
 
@@ -20,9 +26,25 @@ Dikarenakan dataset *cyberbullying* sangat tidak seimbang (*imbalanced*), di man
 
 ---
 
-## 2. Pipeline Proyek (Methodology)
+## 3. Tantangan Utama & Solusi Inovatif (Key Challenges & Solutions)
 
-Berikut adalah ilustrasi alur kerja *Machine Learning* secara *end-to-end* yang diterapkan dalam proyek ini:
+Membangun kecerdasan buatan untuk membaca teks bahasa Indonesia di media sosial menghadirkan hambatan teknis yang signifikan. Berikut adalah cara kami mengatasi tantangan tersebut:
+
+1. **Bahasa Informal & *Typo* (Ambiguitas Semantik):**
+   - *Tantangan*: Algoritma konvensional buta terhadap kata *slang* atau ejaan yang salah.
+   - *Solusi*: Menggunakan pendekatan **Lexicon Injection**. Teks dicocokkan dengan kamus *Abusive/Threat/Insult*. Algoritma akan menempelkan tag rahasia (misal: `tagabusive`) sehingga model langsung mengenali bobot bahaya tanpa harus mengerti kata aslinya.
+2. **Kutukan Dimensi Tinggi (*The Curse of Dimensionality*) & Keterbatasan RAM:**
+   - *Tantangan*: Melebarkan tangkapan fitur TF-IDF hingga *4-grams* menyebabkan matriks bengkak menjadi jutaan kolom, membuat memori RAM (15GB+) dan Swap hancur berantakan saat *hyperparameter tuning*.
+   - *Solusi*: Pemangkasan fitur secara agresif pada tahap ekstrasi TF-IDF (`max_features=60000`). Selain itu, dilakukan pembatasan isolasi pekerja secara *hard-coded* pada GridSearch (`n_jobs=2`, `pre_dispatch=2`) yang menyelamatkan infrastruktur komputasi dari kelumpuhan (*CUDA Out of Memory*).
+3. **Ketidakseimbangan Kelas Ekstrem (*Class Imbalance*):**
+   - *Tantangan*: Model cenderung mengabaikan kelas minoritas (seperti *Threat*) karena populasinya yang sangat sedikit dibandingkan kelas mayoritas (*Normal*).
+   - *Solusi*: Mengevaluasi model secara mutlak menggunakan metrik **F1-Macro**, serta memberikan bobot kelas yang seimbang (`class_weight='balanced'`) pada konfigurasi algoritma, memaksa model untuk lebih menghargai kesalahan pada kelas minoritas.
+
+---
+
+## 4. Pipeline Proyek (Metodologi Terstruktur)
+
+Berikut adalah ilustrasi alur kerja *Machine Learning* secara *end-to-end* yang diterapkan secara berlapis:
 
 ```mermaid
 graph TD
@@ -50,37 +72,37 @@ Pada tahap ini, dataset dari berbagai platform dan penelitian sebelumnya (sepert
 Data yang tergabung divalidasi keutuhannya. Teks dibersihkan dari berbagai *noise* spesifik media sosial (URL, HTML tags, *username/mentions*, *hashtags*, dan tanda baca yang tidak relevan). Kami juga memastikan agar karakter alfanumerik dan spasi tetap rapi tanpa menghilangkan konteks emosional dari kalimat.
 
 ### C. Lexicon Injection (Notebook 05)
-Kelemahan algoritma klasik adalah ketidakmampuannya memahami makna kata. Sebagai solusi inovatif, kami menyuntikkan teknik **Lexicon Tagging**. Jika algoritma menemukan kata yang cocok dengan kamus referensi pelecehan (*abusive.csv, threat.csv, dll.*), ia akan menempelkan tag khusus (misal: `tagabusive`) di akhir kalimat. Hal ini memaksa TF-IDF memberikan bobot matematis yang besar pada sentimen negatif tersebut.
+Kelemahan murni algoritma klasik adalah ketidakmampuannya memahami makna kata. Sebagai peretas kebuntuan (*workaround*), kami menyuntikkan teknik **Lexicon Tagging**. Jika algoritma menemukan kata yang beresonansi dengan kamus referensi pelecehan (*abusive.csv, threat.csv, dll.*), ia akan menempelkan sinyal khusus (misal: `tagabusive`) di akhir kalimat. Hal ini memaksa TF-IDF memberikan gravitasi matematis yang besar pada kalimat-kalimat sentimen negatif tersebut.
 
 ### D. Ekstraksi Fitur TF-IDF (Notebook 06)
-Teks yang sudah bersih dan diinjeksi kamus diubah menjadi bentuk numerik menggunakan *Term Frequency-Inverse Document Frequency* (TF-IDF). Parameter TF-IDF dikalibrasi ketat:
-- **N-gram Range**: (1, 3) untuk menangkap frasa hingga 3 kata.
-- **Max Features**: Dibatasi untuk menghindari ledakan memori RAM (batas ~60.000 fitur).
+Teks yang sudah higienis dan diinjeksi kamus diubah menjadi bentuk vektor numerik. Parameter TF-IDF dikalibrasi secara ketat:
+- **N-gram Range**: (1, 3) untuk menelan struktur konteks frasa hingga 3 kata bersambung.
+- **Max Features**: Dibatasi mutlak untuk menghindari *memory explosion* (batas 60.000 fitur terbaik).
 
 ### E. Modeling & Pemilihan Algoritma (Notebook 07)
-Tiga model *Machine Learning* yang terbukti tangguh terhadap matriks *sparse* berdimensi tinggi dilatih secara komparatif:
-1. **Logistic Regression**: Sebagai *baseline* statistik yang kuat.
-2. **Linear SVM**: Sangat optimal untuk mencari pembatas (*hyperplane*) di dimensi yang luas.
-3. **XGBoost**: Algoritma ansambel modern yang dioptimalkan untuk memori (*Hist* tree method).
+Tiga model *Machine Learning* yang terbukti tangguh terhadap matriks *sparse* (minim nilai padat) berdimensi raksasa dilatih secara komparatif:
+1. **Logistic Regression**: Sebagai fondasi statistik probabilitas yang kuat dan teruji.
+2. **Linear SVM**: Spesialis kelas atas dalam mencari batas pemisah (Hyperplane) terbaik di atas dimensi ruang yang sangat luas.
+3. **XGBoost**: Algoritma ansambel modern berbasis pohon keputusan yang dioptimalkan pembagian memorinya (*Hist tree method*).
 
-### F. Hyperparameter Tuning Terbatas Sumber Daya (Notebook 08)
-Untuk mendapatkan performa maksimal, model disetel menggunakan *GridSearch/RandomizedSearch*. Khusus pada tahap ini, dilakukan pembatasan ketat terhadap utilitas komputasi (`n_jobs=2`, `pre_dispatch=2`) dan dipaksa menggunakan CPU untuk menghindari masalah fatal *CUDA Out of Memory* mengingat matriks TF-IDF memakan RAM yang sangat besar.
+### F. Hyperparameter Tuning Konfigurasi Terbatas (Notebook 08)
+Untuk mengekstrak kapabilitas penuh dari model, model disetel menggunakan *GridSearchCV* dan *RandomizedSearchCV*. Secara spesifik, tahap ini dirancang dengan rekayasa sistem komputer yang sadar-lingkungan; komputasi di-karantina pada skala `n_jobs=2` dan `pre_dispatch=2`, memaksa pencarian *hyperparameter* berjalan dengan perlahan namun selamat dari bencana memori bocor (*Memory Leak / Out of Memory*).
 
-### G. Evaluasi & Error Analysis (Notebook 09-10)
-Setiap model dinilai tidak hanya melalui akurasi, tetapi menggunakan **F1-Macro**. Analisis kesalahan (Error Analysis) dilakukan secara visual untuk melacak di kelas mana model sering terkecoh.
+### G. Evaluasi Presisi & Analisis Kesalahan (Notebook 09-10)
+Setiap model di-interogasi tidak hanya melalui skor akurasi yang menipu, melainkan menggunakan objektivitas **F1-Macro**. Analisis kesalahan divisualisasikan untuk mendeteksi kebutaan model terhadap kelas tertentu.
 
 ![Error Rate by Class](reports/error_analysis/error_rate_by_class.png)
-*Gambar: Visualisasi Error Analysis untuk melihat distribusi kesalahan prediksi antar kelas.*
+*Gambar: Peta Distribusi Kesalahan (Error Analysis). Mengidentifikasi area di mana kecerdasan buatan masih mengalami kesulitan membedakan sarkasme atau konteks ganda.*
 
-### H. Model Explainability (Notebook 11)
-AI sering kali dianggap sebagai "Kotak Hitam". Proyek ini menggunakan **LIME (Local Interpretable Model-agnostic Explanations)** untuk membongkar kotak hitam tersebut, memperlihatkan kata spesifik apa yang membuat model memutuskan sebuah kalimat tergolong *cyberbullying*.
+### H. Transparansi Algoritma / Explainability (Notebook 11)
+Algoritma Kecerdasan Buatan tidak boleh menjadi sebuah "Kotak Hitam" yang diktatorial. Proyek ini mengimplementasikan **LIME (Local Interpretable Model-agnostic Explanations)** untuk membongkar organ pemikiran mesin, membuktikan secara hukum dan logis kata spesifik apa saja yang memicu model untuk melabeli sebuah kalimat sebagai perundungan.
 
 ![Top Words per Class](reports/explainability/top_words_per_class.png)
-*Gambar: Kata-kata teratas (Top Words) yang paling berpengaruh terhadap setiap kelas.*
+*Gambar: Transparansi kata (Top Words). Kosakata yang memberikan sumbangsih terbesar terhadap vonis klasifikasi.*
 
 ---
 
-## 4. Hasil dan Analisis
+## 5. Hasil, Analisis & Kesimpulan Akhir
 
 Berdasarkan tahap evaluasi terakhir (`reports/model_selection.json`), model terbaik yang berhasil memenangkan kompetisi perbandingan algoritma ini adalah **Linear SVM**.
 
@@ -90,15 +112,20 @@ Berdasarkan tahap evaluasi terakhir (`reports/model_selection.json`), model terb
 - **Recall**: 66.70%
 - **F1-Score (Macro)**: **66.87%**
 
-**Analisis Kemenangan Linear SVM:**
-F1-Macro Score sebesar ~66.8% menunjukkan bahwa model mampu menyeimbangkan prediksi pada kelas perundungan mayoritas dan minoritas dengan presisi yang sangat baik. Linear SVM berhasil mengalahkan XGBoost dan Logistic Regression karena sifat aslinya yang sangat superior dalam mencari batas pemisah (*margin*) pada matriks *sparse* (TF-IDF) yang memiliki dimensi berukuran masif (puluhan ribu kolom fitur kata). 
+**Kesimpulan Pemenang (Linear SVM):**
+Perolehan F1-Macro Score sebesar ~66.8% membuktikan bahwa model mampu menyeimbangkan prediksi probabilitas antara kelas perundungan mayoritas dan minoritas tanpa adanya timpang tindih yang parah. Linear SVM berhasil memenangkan performa atas XGBoost dan Logistic Regression karena tabiat bawaannya yang terlahir untuk menembus matriks *sparse* (TF-IDF). Di tengah dimensi berukuran sangat masif (60.000 kolom kata), Linear SVM mampu melacak dan menarik garis margin pemisah dengan efisiensi yang nyaris sempurna. 
 
 ![Confusion Matrix - Linear SVM](reports/confusion_matrix_linear_svm_baseline.png)
-*Gambar: Confusion Matrix dari Linear SVM. Diagonal utama menunjukkan prediksi yang tepat, sementara titik di luar diagonal merepresentasikan kesalahan prediksi akibat ambiguitas semantik kalimat.*
+*Gambar: Matriks Kebingungan (Confusion Matrix) dari algoritma Linear SVM. Diagonal vertikal membuktikan konsentrasi akurasi tebakan yang sehat.*
+
+### Rekomendasi & Pengembangan Lanjutan (Future Work)
+Meski teknik klasik TF-IDF dan Lexicon Injection sudah dipaksa hingga batas optimalnya, performa ini masih menyisakan ruang pertumbuhan. Untuk penelitian lanjutan, kami merekomendasikan:
+1. **Transisi ke Arsitektur Deep Learning**: Mengganti mesin penghitung kata (TF-IDF) menjadi pemahaman konseptual dengan menggunakan model *Large Language Model (LLM)* atau *Transformer* berukuran kecil berbahasa Indonesia (seperti **IndoBERT**).
+2. **Teknik SMOTE Lanjutan**: Jika infrastruktur perangkat keras memadai, melakukan penyeimbangan buatan terhadap kelas minoritas (*Threat* dan *Abusive*) menggunakan modul augmentasi seperti *Synthetic Minority Over-sampling Technique (SMOTE)*.
 
 ---
 
-## 5. Struktur Repositori
+## 6. Struktur Direktori Repositori (Project Architecture)
 
 Struktur direktori ini dirancang rapi sesuai standar industri untuk *Data Science* & *Machine Learning Engineering*:
 
@@ -123,22 +150,25 @@ UAS-PM/
 
 ---
 
-## 6. Cara Menjalankan Aplikasi (Deployment Demo)
+## 7. Penyiapan Lingkungan & Cara Penggunaan (Deployment)
 
-Proyek ini telah dikemas menjadi aplikasi web interaktif yang memungkinkan Anda memasukkan teks secara *live*, melihat proses pembersihan secara transparan, serta memahami bagaimana kecerdasan buatan membaca kalimat melalui **LIME Explainability**.
+Proyek ini telah dikemas menjadi antarmuka web interaktif yang siap disajikan kepada pengguna awam (*non-technical stakeholder*). Pengguna dapat menguji teks apa pun secara seketika (*live preview*), memantau sistem melakukan pembersihan, dan secara riil membaca grafik otak AI menganalisis alasan penarikan kesimpulan.
 
-### Menjalankan secara Lokal
-1. Buka terminal dan pastikan Anda berada di direktori akar (*root*) proyek.
-2. Aktifkan virtual environment Anda (jika ada).
-3. Jalankan perintah berikut:
+### Persyaratan Sistem
+Pastikan pustaka pendukung pada `requirements.txt` telah terpasang.
+
+### Cara Menjalankan Server Lokal
+1. Buka *Terminal* atau *Command Prompt*, dan navigasikan terminal ke direktori akar (root) tempat repositori ini diunduh.
+2. (Opsional) Aktifkan *Virtual Environment* Anda.
+3. Eksekusi peladen antarmuka Streamlit dengan baris perintah berikut:
    ```bash
    streamlit run streamlit/app.py
    ```
-4. *Browser* akan terbuka otomatis di alamat `http://localhost:8501`.
+4. Panel aplikasi berbasis peramban web (*browser*) akan langsung merespons di `http://localhost:8501`.
 
 ---
 
-## 7. Referensi / Tautan Eksternal
+## 8. Tautan Referensi & Pustaka Proyek
 
 - **Tautan Repositori GitHub**: [https://github.com/zappto/UAS-PM.git](https://github.com/zappto/UAS-PM.git)
 - **Tautan Presentasi YouTube**: `[INSERT YOUTUBE LINK HERE]`
