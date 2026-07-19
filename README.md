@@ -4,6 +4,10 @@
 
 **🌐 LIVE DEMO APLIKASI:** [**https://uas-pm.streamlit.app/**](https://uas-pm.streamlit.app/)
 
+## 🔗 Tautan Penting
+- **🎥 Video Presentasi (YouTube)**: *[Taruh Link YouTube Anda Di Sini]*
+- **💻 Kode Sumber (GitHub)**: *[Taruh Link Repositori GitHub Anda Di Sini]*
+
 <br><br>
 
 ## ABSTRAK
@@ -229,7 +233,7 @@ UAS-PM/
 
 **A. Akses Cloud Langsung (Live Demo)**  
 Aplikasi telah di-deploy secara publik dan dapat diuji coba tanpa instalasi melalui tautan berikut:  
-👉 **[https://uas-pm.streamlit.app/](https://uas-pm.streamlit.app/)**
+ **[https://uas-pm.streamlit.app/](https://uas-pm.streamlit.app/)**
 
 **B. Menjalankan secara Lokal**
 1. Buka Terminal dan navigasikan ke direktori akar (root) repositori ini.
