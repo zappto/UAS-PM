@@ -39,17 +39,44 @@ graph TD
 
 ---
 
-## 3. Metodologi dan Teknik yang Digunakan
+## 3. Penjelasan Struktur Pipeline (End-to-End)
 
-1. **Data Acquisition & Merging**: Dataset dikumpulkan dari berbagai sumber publik (seperti *hatespeech*, *abusive*, *threat*, dan *insult* dataset). Data ini kemudian digabungkan secara global.
-2. **Preprocessing & Lexicon Tagging**: Teks dibersihkan dari URL, *hashtag*, dan *mention*. Sastrawi digunakan dalam versi awal untuk *stemming*. Kami menyuntikkan teknik **Lexicon Tagging** di mana algoritma mencocokkan kata dengan kamus referensi (contoh: *abusive.csv*), lalu menyematkan *tag* tambahan pada kalimat untuk memperkuat fitur bagi algoritma klasifikasi.
-3. **Ekstraksi Fitur (TF-IDF)**: Mengubah teks menjadi angka menggunakan *Term Frequency-Inverse Document Frequency*. Pengaturan dioptimalkan untuk menangkap *n-gram* (frasa kata) dan dibatasi maksimal fitur (*max_features*) untuk mencegah ledakan memori RAM (batas 60.000 fitur).
-4. **Pemodelan (Modeling)**: Melatih tiga model yang secara teori kuat menangani matriks *sparse*:
-   - Logistic Regression
-   - Linear SVM (Support Vector Machine)
-   - XGBoost
-5. **Hyperparameter Tuning**: Pencarian parameter terbaik melalui *GridSearchCV* dan *RandomizedSearchCV* dengan pembatasan komputasi (`n_jobs=2`, `pre_dispatch=2`) agar proses pencarian *hyperparameter* dapat berjalan efisien tanpa mengakibatkan memori RAM sistem penuh.
-6. **Interpretasi Model (Explainability)**: Penggunaan pustaka LIME (*Local Interpretable Model-agnostic Explanations*) untuk menjelaskan kata mana yang berkontribusi paling kuat terhadap keputusan prediksi model (karena transparansi *AI* sangat penting dalam domain sosial seperti ini).
+Proyek ini dibangun menggunakan pendekatan berlapis (modular) agar setiap proses dapat dievaluasi secara independen. Berikut adalah penjelasan rinci untuk setiap tahapan:
+
+### A. Data Acquisition & Merging (Notebook 01)
+Pada tahap ini, dataset dari berbagai platform dan penelitian sebelumnya (seperti dataset sentimen, *abusive*, *threat*, dan *insult*) dikumpulkan. Dataset tersebut digabungkan menjadi satu repositori utama (`data.csv`). Kami melakukan pemetaan kelas (*relabeling*) agar memiliki standar yang seragam (misal: label `HS` diubah menjadi `hate_speech`).
+
+### B. Exploratory Data Analysis & Text Cleaning (Notebook 02-04)
+Data yang tergabung divalidasi keutuhannya. Teks dibersihkan dari berbagai *noise* spesifik media sosial (URL, HTML tags, *username/mentions*, *hashtags*, dan tanda baca yang tidak relevan). Kami juga memastikan agar karakter alfanumerik dan spasi tetap rapi tanpa menghilangkan konteks emosional dari kalimat.
+
+### C. Lexicon Injection (Notebook 05)
+Kelemahan algoritma klasik adalah ketidakmampuannya memahami makna kata. Sebagai solusi inovatif, kami menyuntikkan teknik **Lexicon Tagging**. Jika algoritma menemukan kata yang cocok dengan kamus referensi pelecehan (*abusive.csv, threat.csv, dll.*), ia akan menempelkan tag khusus (misal: `tagabusive`) di akhir kalimat. Hal ini memaksa TF-IDF memberikan bobot matematis yang besar pada sentimen negatif tersebut.
+
+### D. Ekstraksi Fitur TF-IDF (Notebook 06)
+Teks yang sudah bersih dan diinjeksi kamus diubah menjadi bentuk numerik menggunakan *Term Frequency-Inverse Document Frequency* (TF-IDF). Parameter TF-IDF dikalibrasi ketat:
+- **N-gram Range**: (1, 3) untuk menangkap frasa hingga 3 kata.
+- **Max Features**: Dibatasi untuk menghindari ledakan memori RAM (batas ~60.000 fitur).
+
+### E. Modeling & Pemilihan Algoritma (Notebook 07)
+Tiga model *Machine Learning* yang terbukti tangguh terhadap matriks *sparse* berdimensi tinggi dilatih secara komparatif:
+1. **Logistic Regression**: Sebagai *baseline* statistik yang kuat.
+2. **Linear SVM**: Sangat optimal untuk mencari pembatas (*hyperplane*) di dimensi yang luas.
+3. **XGBoost**: Algoritma ansambel modern yang dioptimalkan untuk memori (*Hist* tree method).
+
+### F. Hyperparameter Tuning Terbatas Sumber Daya (Notebook 08)
+Untuk mendapatkan performa maksimal, model disetel menggunakan *GridSearch/RandomizedSearch*. Khusus pada tahap ini, dilakukan pembatasan ketat terhadap utilitas komputasi (`n_jobs=2`, `pre_dispatch=2`) dan dipaksa menggunakan CPU untuk menghindari masalah fatal *CUDA Out of Memory* mengingat matriks TF-IDF memakan RAM yang sangat besar.
+
+### G. Evaluasi & Error Analysis (Notebook 09-10)
+Setiap model dinilai tidak hanya melalui akurasi, tetapi menggunakan **F1-Macro**. Analisis kesalahan (Error Analysis) dilakukan secara visual untuk melacak di kelas mana model sering terkecoh.
+
+![Error Rate by Class](reports/error_analysis/error_rate_by_class.png)
+*Gambar: Visualisasi Error Analysis untuk melihat distribusi kesalahan prediksi antar kelas.*
+
+### H. Model Explainability (Notebook 11)
+AI sering kali dianggap sebagai "Kotak Hitam". Proyek ini menggunakan **LIME (Local Interpretable Model-agnostic Explanations)** untuk membongkar kotak hitam tersebut, memperlihatkan kata spesifik apa yang membuat model memutuskan sebuah kalimat tergolong *cyberbullying*.
+
+![Top Words per Class](reports/explainability/top_words_per_class.png)
+*Gambar: Kata-kata teratas (Top Words) yang paling berpengaruh terhadap setiap kelas.*
 
 ---
 
@@ -63,8 +90,11 @@ Berdasarkan tahap evaluasi terakhir (`reports/model_selection.json`), model terb
 - **Recall**: 66.70%
 - **F1-Score (Macro)**: **66.87%**
 
-**Analisis:**
-F1-Macro Score sebesar ~66.8% menunjukkan bahwa model mampu menyeimbangkan prediksi pada kelas perundungan mayoritas dan minoritas dengan cukup presisi menggunakan ruang *hyperplane* linear. Mengingat sifat algoritma klasik berbasis TF-IDF, tingkat deteksi ini merupakan ambang batas performa yang sangat masuk akal, membuktikan bahwa penambahan *Lexicon Tagging* dan pelebaran *TF-IDF N-grams* sukses menyelamatkan banyak bobot fitur pada *sparse matrix* tanpa harus *overfitting*. Algoritma ini dipilih karena kecepatan pelatihannya dan kemampuannya mencari margin terbaik pada dimensi berukuran puluhan ribu kolom.
+**Analisis Kemenangan Linear SVM:**
+F1-Macro Score sebesar ~66.8% menunjukkan bahwa model mampu menyeimbangkan prediksi pada kelas perundungan mayoritas dan minoritas dengan presisi yang sangat baik. Linear SVM berhasil mengalahkan XGBoost dan Logistic Regression karena sifat aslinya yang sangat superior dalam mencari batas pemisah (*margin*) pada matriks *sparse* (TF-IDF) yang memiliki dimensi berukuran masif (puluhan ribu kolom fitur kata). 
+
+![Confusion Matrix - Linear SVM](reports/confusion_matrix_linear_svm_baseline.png)
+*Gambar: Confusion Matrix dari Linear SVM. Diagonal utama menunjukkan prediksi yang tepat, sementara titik di luar diagonal merepresentasikan kesalahan prediksi akibat ambiguitas semantik kalimat.*
 
 ---
 
