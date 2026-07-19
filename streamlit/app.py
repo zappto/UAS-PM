@@ -158,7 +158,8 @@ def render_home():
         meta = load_model_selection_meta()
         if meta:
             st.success(f"**Champion Model:** {meta.get('selected_model')}")
-            st.metric(label="Best F1-Macro Score", value=f"{meta.get('selected_f1_macro'):.4f}")
+            f1 = meta.get('final_metrics', {}).get('f1_score', 0)
+            st.metric(label="Best F1-Macro Score", value=f"{f1:.4f}")
         else:
             st.warning("Model Selection data not available. Please complete Stage 09.")
             
@@ -192,7 +193,8 @@ def render_performance():
     with col1:
         st.metric("Model Name", meta.get('selected_model', 'Unknown'))
     with col2:
-        st.metric("Test F1-Macro Score", f"{meta.get('selected_f1_macro', 0):.4f}")
+        f1 = meta.get('final_metrics', {}).get('f1_score', 0)
+        st.metric("Test F1-Macro Score", f"{f1:.4f}")
         
     st.markdown("---")
     st.subheader("Model Comparison Leaderboard")
