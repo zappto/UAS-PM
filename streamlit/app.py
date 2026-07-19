@@ -19,6 +19,7 @@ try:
     from lime.lime_text import LimeTextExplainer
     import matplotlib.pyplot as plt
     import seaborn as sns
+    import plotly.express as px
     LIME_AVAILABLE = True
 except ImportError:
     LIME_AVAILABLE = False
@@ -404,23 +405,38 @@ def render_prediction():
                 exp = explainer.explain_instance(clean_text, lime_pipeline, num_features=10, top_labels=1)
                 
                 pred_label_idx = exp.available_labels()[0]
-                
-                # Render HTML LIME in Streamlit (Fix Dark Mode Readability)
-                raw_html = exp.as_html()
-                # Inject CSS to force white background and black text inside the iframe
-                if "</head>" in raw_html:
-                    raw_html = raw_html.replace("</head>", "<style>body { background-color: white !important; color: black !important; padding: 20px; border-radius: 8px; }</style></head>")
-                else:
-                    raw_html = f"<div style='background-color: white !important; color: black !important; padding: 20px; border-radius: 8px;'>{raw_html}</div>"
-                    
-                components.html(raw_html, height=350, scrolling=True)
-                
-                st.markdown("#### Fitur yang Berkontribusi terhadap Prediksi")
                 word_weights = exp.as_list(label=pred_label_idx)
+                
+                # --- Modern Plotly Visualization for LIME ---
                 if word_weights:
                     df_weights = pd.DataFrame(word_weights, columns=['Feature', 'Contribution'])
-                    df_weights['Contribution'] = df_weights['Contribution'].apply(lambda x: f"{x:+.4f}")
-                    st.table(df_weights.set_index('Feature'))
+                    # Determine direction for coloring
+                    df_weights['Arah'] = df_weights['Contribution'].apply(
+                        lambda x: 'Mendukung Prediksi' if x > 0 else 'Bertentangan dengan Prediksi'
+                    )
+                    
+                    fig = px.bar(
+                        df_weights, 
+                        x='Contribution', 
+                        y='Feature', 
+                        color='Arah',
+                        orientation='h',
+                        color_discrete_map={
+                            'Mendukung Prediksi': '#2e7d32', # Forest Green
+                            'Bertentangan dengan Prediksi': '#c62828' # Deep Red
+                        },
+                        title=f"Analisis Kontribusi Kata terhadap Kelas '{predicted_class}'"
+                    )
+                    
+                    fig.update_layout(
+                        yaxis={'categoryorder':'total ascending'},
+                        plot_bgcolor='rgba(0,0,0,0)',
+                        paper_bgcolor='rgba(0,0,0,0)',
+                        font=dict(size=14)
+                    )
+                    st.plotly_chart(fig, use_container_width=True)
+                else:
+                    st.warning("LIME tidak dapat menemukan fitur yang signifikan pada kalimat ini.")
                 
                 # --- SECTION 11: INTERPRETATION TEXT ---
                 st.markdown("---")
