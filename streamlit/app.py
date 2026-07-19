@@ -35,11 +35,11 @@ st.set_page_config(
 PROJECT_ROOT = pathlib.Path(__file__).parent.parent
 DATA_DIR = PROJECT_ROOT / "data"
 MODELS_DIR = PROJECT_ROOT / "models"
-REPORTS_DIR = PROJECT_ROOT / "reports"
+BASE_REPORTS_DIR = PROJECT_ROOT / "reports"
 
 TFIDF_DIR = DATA_DIR / "processed" / "tfidf"
-ERROR_DIR = REPORTS_DIR / "error_analysis"
-EXPLAIN_DIR = REPORTS_DIR / "explainability"
+ERROR_DIR = BASE_REPORTS_DIR / "error_analysis"
+EXPLAIN_DIR = BASE_REPORTS_DIR / "explainability"
 
 # ==========================================
 # 2. CACHED HELPER FUNCTIONS
@@ -66,7 +66,7 @@ def load_tfidf_vectorizer():
 
 @st.cache_data
 def load_model_selection_meta():
-    meta_path = REPORTS_DIR / "model_selection.json"
+    meta_path = BASE_REPORTS_DIR / "model_evaluation" / "model_selection.json"
     if meta_path.exists():
         with open(meta_path, 'r') as f:
             return json.load(f)
@@ -195,7 +195,7 @@ def render_performance():
         st.metric("Test F1-Macro Score", f"{f1:.4f}")
         
     st.markdown("---")
-    eval_df = load_csv(REPORTS_DIR / "model_evaluation_metrics.csv")
+    eval_df = load_csv(BASE_REPORTS_DIR / "model_evaluation" / "model_evaluation_results.csv")
     if eval_df is not None:
         st.dataframe(eval_df.style.highlight_max(subset=['F1_Macro', 'Accuracy'], color='lightgreen'))
     else:
