@@ -5,8 +5,9 @@
 **🌐 LIVE DEMO APLIKASI:** [**https://uas-pm.streamlit.app/**](https://uas-pm.streamlit.app/)
 
 ## 🔗 Tautan Penting
-- **🎥 Video Presentasi (YouTube)**: *[Taruh Link YouTube Anda Di Sini]*
-- **💻 Kode Sumber (GitHub)**: *[Taruh Link Repositori GitHub Anda Di Sini]*
+- **🎥 Video Presentasi (YouTube)**: [https://youtu.be/lQ4iMzBRCBc](https://youtu.be/lQ4iMzBRCBc)
+- **💻 Kode Sumber Proyek Akhir (GitHub)**: [https://github.com/zappto/UAS-PM/tree/main](https://github.com/zappto/UAS-PM/tree/main)
+- **📝 Repositori Tugas Mingguan (GitHub)**: [https://github.com/zappto/Mesin-learning](https://github.com/zappto/Mesin-learning)
 
 <br><br>
 
