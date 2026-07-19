@@ -57,7 +57,12 @@ graph TD
 ```
 
 ### 3.1 Akuisisi & Penggabungan Data (Notebook 01-04)
-Dataset dikumpulkan dari berbagai platform dan penelitian sentimen sebelumnya. Data tersebut divalidasi keutuhannya dan dilakukan pemetaan kelas (*relabeling*) agar memiliki standar yang seragam. Teks kemudian dibersihkan dari *noise* spesifik (URL, HTML tags, *username/mentions*, dan *hashtags*) tanpa menghilangkan konteks emosional.
+Dataset dikumpulkan dari tiga sumber utama (platform publik dan penelitian sentimen sebelumnya) yang memuat teks perundungan dan ujaran kebencian berbahasa Indonesia:
+1. **HuggingFace (IndoDiscourse)**: [IndoToxic 2024 Annotated Data](https://huggingface.co/datasets/Exqrch/IndoDiscourse/blob/main/indotoxic2024_annotated_data_v2_final.csv)
+2. **Kaggle**: [Cleaned Indonesian Cyberbullying Dataset](https://www.kaggle.com/datasets/leonss0711/cleaned-indonesian-cyberbullying-dataset?select=combined_dataset.csv)
+3. **GitHub (Ibrohim et al.)**: [Multi-label Hate Speech & Abusive Language](https://github.com/okkyibrohim/id-multi-label-hate-speech-and-abusive-language-detection/blob/master/re_dataset.csv)
+
+Data tersebut divalidasi keutuhannya dan dilakukan pemetaan kelas (*relabeling*) agar memiliki standar yang seragam. Teks kemudian dibersihkan dari *noise* spesifik (URL, HTML tags, *username/mentions*, dan *hashtags*) tanpa menghilangkan konteks emosional.
 
 ### 3.2 Lexicon Injection & TF-IDF (Notebook 05-06)
 Sebagai peretas kebuntuan (*workaround*) algoritma buta makna, teks dicocokkan dengan kamus referensi pelecehan. Jika cocok, sistem menempelkan sinyal (misal: `tagabusive`), memaksa TF-IDF memberikan gravitasi matematis yang besar pada sentimen negatif tersebut. TF-IDF dikalibrasi ketat dengan menangkap frasa hingga 3 kata (*N-gram Range: 1-3*) dan dibatasi maksimal 60.000 fitur untuk menghindari *memory explosion*.
