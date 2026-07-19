@@ -20,6 +20,7 @@ try:
     import matplotlib.pyplot as plt
     import seaborn as sns
     import plotly.express as px
+    import plotly.graph_objects as go
     LIME_AVAILABLE = True
 except ImportError:
     LIME_AVAILABLE = False
@@ -176,25 +177,41 @@ def get_probabilities(model, X_vec):
 
 def render_home():
     st.title("🛡️ Cyberbullying Text Classification")
-    st.subheader("Indonesian Language NLP Research Project")
+    st.markdown("### Indonesian Language NLP Research Project Dashboard")
     st.markdown("---")
     
     col1, col2 = st.columns([2, 1])
     with col1:
         st.markdown("""
-        ### Research Objective
-        This dashboard presents the findings of the research titled:
-        > *"Analisis Performa Algoritma Machine Learning untuk Klasifikasi Jenis dan Tingkat Keparahan Cyberbullying pada Teks Bahasa Indonesia Menggunakan TF-IDF"*
+        **Selamat datang di Dasbor Penelitian Analisis Sentimen!**
         
-        The goal is to automatically detect and classify Indonesian text into specific categories of cyberbullying to assist in digital moderation and linguistic research.
+        Sistem ini mendemonstrasikan kapabilitas kecerdasan buatan (*Machine Learning*) dalam mendeteksi dan mengklasifikasikan teks perundungan siber (*cyberbullying*) ke dalam **5 kategori spesifik**:
+        - 🟢 **Normal**: Teks aman tanpa indikasi pelecehan.
+        - 🟡 **Harassment**: Pelecehan/Pelecehan Seksual.
+        - 🟠 **Insult**: Penghinaan atau cacian personal.
+        - 🔴 **Abusive**: Penggunaan bahasa kasar yang merendahkan.
+        - 💀 **Threat**: Ancaman fisik atau psikologis.
+
+        **⚙️ Arsitektur Sistem (Pipeline):**
+        1. **Data Preprocessing**: Pembersihan *Noise* & injeksi leksikon Sastrawi.
+        2. **Feature Engineering**: Ekstraksi bobot kata via *Term Frequency - Inverse Document Frequency* (TF-IDF).
+        3. **Classification Engine**: Support Vector Machine (Linear SVM).
+        4. **Explainable AI (XAI)**: Transparansi logika model menggunakan algoritma LIME.
         """)
     with col2:
-        st.info("### Quick Stats")
+        st.info("📊 **Statistik Utama Riset**")
         meta = load_model_selection_meta()
         if meta:
-            st.success(f"**Champion Model:** {meta.get('selected_model')}")
+            st.success(f"**🏅 Champion Model:**\n\n{meta.get('selected_model')}")
             f1 = meta.get('final_metrics', {}).get('f1_score', 0)
-            st.metric(label="Best F1-Macro Score", value=f"{f1:.4f}")
+            st.metric(label="🏆 Best F1-Macro Score", value=f"{f1*100:.2f}%")
+            
+            acc = meta.get('final_metrics', {}).get('accuracy', 0)
+            if acc == 0: # Fallback if accuracy isn't explicitly in final_metrics but rather model_evaluation_results.csv
+                eval_df = load_csv(BASE_REPORTS_DIR / "model_evaluation_results.csv")
+                if eval_df is not None and not eval_df.empty:
+                    acc = eval_df.loc[eval_df['Model'] == meta.get('selected_model'), 'Accuracy'].values[0]
+            st.metric(label="🎯 Overall Accuracy", value=f"{acc*100:.2f}%")
         else:
             st.warning("Model Selection data not available. Please complete Stage 09.")
             
@@ -368,10 +385,31 @@ def render_prediction():
             # --- SECTION 5: PREDICTION RESULT ---
             st.markdown("---")
             st.subheader("PREDICTION RESULT")
-            st.markdown(f"**Predicted Type:** `{predicted_class}`")
-            st.markdown(f"**Model:** `{champ_model_name}`")
-            if confidence is not None:
-                st.markdown(f"**Model Confidence:** `{confidence*100:.2f}%`")
+            
+            res_col1, res_col2 = st.columns(2)
+            with res_col1:
+                st.markdown(f"#### Hasil Analisis: `{predicted_class.upper()}`")
+                st.markdown(f"**Mesin Inferensi:** `{champ_model_name}`")
+            
+            with res_col2:
+                if confidence is not None:
+                    # Modern Plotly Gauge Chart for Confidence
+                    fig_gauge = go.Figure(go.Indicator(
+                        mode = "gauge+number",
+                        value = confidence * 100,
+                        domain = {'x': [0, 1], 'y': [0, 1]},
+                        title = {'text': "Tingkat Keyakinan Model (Confidence)", 'font': {'size': 14}},
+                        gauge = {
+                            'axis': {'range': [0, 100]},
+                            'bar': {'color': "#2e7d32" if confidence > 0.7 else "#f57c00"},
+                            'steps': [
+                                {'range': [0, 50], 'color': "rgba(255, 0, 0, 0.1)"},
+                                {'range': [50, 75], 'color': "rgba(255, 165, 0, 0.1)"},
+                                {'range': [75, 100], 'color': "rgba(0, 255, 0, 0.1)"}],
+                        }
+                    ))
+                    fig_gauge.update_layout(height=200, margin=dict(l=10, r=10, t=40, b=10), paper_bgcolor="rgba(0,0,0,0)", font={'color': "white"})
+                    st.plotly_chart(fig_gauge, use_container_width=True)
                 
             # --- SECTION 7: PROBABILITY DISTRIBUTION ---
             st.markdown("---")
@@ -380,16 +418,18 @@ def render_prediction():
                 prob_df = pd.DataFrame({'Class': class_names, 'Probability': probs})
                 prob_df = prob_df.sort_values(by='Probability', ascending=True)
                 
-                fig_prob, ax_prob = plt.subplots(figsize=(8, max(3, len(class_names)*0.5)))
-                ax_prob.barh(prob_df['Class'], prob_df['Probability'] * 100, color='skyblue')
-                ax_prob.set_xlabel('Probability (%)')
-                st.pyplot(fig_prob)
+                fig_prob = px.bar(prob_df, x='Probability', y='Class', orientation='h', 
+                                  title="Distribusi Probabilitas antar Kelas",
+                                  color='Probability', color_continuous_scale='viridis')
+                fig_prob.update_layout(height=300, paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)")
+                st.plotly_chart(fig_prob, use_container_width=True)
             else:
                 st.info("Probability distribution is not available for this model.")
                 
             # --- SECTION 9/10: MODEL EXPLANATION (LIME) ---
             st.markdown("---")
-            st.subheader("MODEL EXPLANATION")
+            st.subheader("MODEL EXPLANATION (LIME)")
+            st.markdown("Kecerdasan Buatan (AI) bukanlah '*Black Box*'. Melalui pustaka **LIME (Local Interpretable Model-Agnostic Explanations)**, sistem ini secara transparan membongkar kata apa yang mendikte keputusan AI. Lihat grafik di bawah untuk memahami mengapa model menjatuhkan vonis tersebut.")
             
             if LIME_AVAILABLE and len(non_zero_indices) > 0:
                 def lime_pipeline(texts):
@@ -449,20 +489,52 @@ def render_prediction():
 
 def render_error_analysis():
     st.title("🕵️ Error Analysis")
+    st.markdown("Di halaman ini, kita membongkar secara objektif titik-titik kelemahan algoritma kecerdasan buatan. Model ML tidak pernah sempurna; memahami di mana model tersebut gagal adalah esensi dari penelitian Data Science.")
     st.markdown("---")
+    
     error_summary = load_json(ERROR_DIR / "error_analysis_summary.json")
     if error_summary:
+        st.subheader("Ringkasan Metrik Kegagalan")
         col1, col2, col3 = st.columns(3)
-        col1.metric("Overall Error Rate", f"{error_summary.get('overall_error_rate_percent')}%")
-        col2.metric("Highest Error Class", error_summary.get('highest_error_class'))
-        col3.metric("High-Confidence Errors", error_summary.get('high_confidence_errors_count'))
+        col1.error(f"❌ Overall Error Rate\n\n# {error_summary.get('overall_error_rate_percent')}%")
+        col2.warning(f"⚠️ Kelas Paling Rentan Meleset\n\n# {error_summary.get('highest_error_class')}")
+        col3.info(f"🤔 High-Confidence Errors\n\n# {error_summary.get('high_confidence_errors_count')} Kasus")
+        
+    st.markdown("---")
+    colA, colB = st.columns(2)
+    with colA:
+        st.subheader("Distribusi Error berdasarkan Kelas")
+        st.markdown("Grafik ini menunjukkan persentase kalimat pada kelas tertentu yang gagal dikenali oleh sistem (salah tebak kelas).")
+        try:
+            img_err1 = Image.open(ERROR_DIR / "error_rate_by_class.png")
+            st.image(img_err1, use_column_width=True)
+        except Exception:
+            st.info("Gambar error rate tidak ditemukan.")
+            
+    with colB:
+        st.subheader("Korelasi Panjang Kata vs Error")
+        st.markdown("Apakah kalimat yang terlalu panjang (atau terlalu pendek) menyebabkan AI kebingungan? Grafik ini menjawab fenomena tersebut.")
+        try:
+            img_err2 = Image.open(ERROR_DIR / "word_count_vs_errors.png")
+            st.image(img_err2, use_column_width=True)
+        except Exception:
+            st.info("Gambar word count vs errors tidak ditemukan.")
 
 def render_explainability():
     st.title("🧠 Global Explainability")
+    st.markdown("Analisis XAI (*Explainable AI*) secara global berfungsi untuk memetakan '*kosakata otak*' dari model TF-IDF yang telah dilatih. Kata apa saja yang secara matematis menjadi pemicu terkuat untuk masing-masing kelas perundungan?")
     st.markdown("---")
+    
     try:
         global_img = Image.open(EXPLAIN_DIR / "top_words_per_class.png")
-        st.image(global_img, caption="Top influential words per class")
+        st.image(global_img, caption="Bobot Kosakata Global (Top Influential Words per Class)", use_column_width=True)
+        
+        st.info("""
+        **Cara Membaca Grafik:**
+        - Tiap panel merepresentasikan satu kelas sentimen.
+        - Semakin panjang balok kata ke arah kanan (positif), semakin besar pengaruh kata tersebut dalam memicu model untuk memilih kelas tersebut.
+        - Sebaliknya, kata dengan nilai negatif berarti kemunculan kata tersebut justru "menjauhkan" model dari kelas tersebut.
+        """)
     except FileNotFoundError:
         st.info("Global word visualization not available. Run `11_explainability.ipynb`.")
 
