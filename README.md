@@ -163,11 +163,49 @@ Untuk mengelevasi limitasi komputasi saat ini pada ruang lingkup mendatang, kami
 
 <br><br>
 
-## BAB VII: STRUKTUR REPOSITORI & DEPLOYMENT
+## BAB VII: ANTARMUKA APLIKASI (DASHBOARD PREVIEW)
+
+Sebagai manifestasi konkrit dari penelitian ini, seluruh *pipeline* Machine Learning telah diintegrasikan ke dalam antarmuka web interaktif berbasis Streamlit. Berikut adalah pratinjau fungsionalitas sistem:
+
+### 7.1 Beranda (Home & Overview)
+![Home Overview](docs/screenshots/01_home.png)
+*Beranda aplikasi menyajikan landasan teori secara komprehensif, mendefinisikan kelima kelas sentimen yang diteliti, serta menampilkan secara *real-time* arsitektur pipeline dan metrik kemenangan algoritma unggulan (*Champion Model*).*
+
+### 7.2 Analisis Data Eksploratif (EDA Dashboard)
+![EDA Dashboard](docs/screenshots/02_eda.png)
+*Panel EDA memberikan transparansi mengenai karakteristik data mentah yang diolah. Visualisasi ini krusial untuk membuktikan adanya fenomena ketidakseimbangan kelas (*Class Imbalance*) serta kecenderungan distribusi panjang kalimat dari warganet Indonesia.*
+
+### 7.3 Komparasi Performa (Model Performance)
+![Model Performance](docs/screenshots/03_performance.png)
+*Halaman evaluasi secara transparan membentangkan klasemen (*leaderboard*) algoritma. Peneliti maupun pengguna dapat menganalisis dan membandingkan secara langsung metrik Accuracy, Precision, Recall, dan F1-Score dari berbagai model klasifikasi yang telah diuji.*
+
+### 7.4 Input Analisis (Text Analysis)
+![Text Analysis](docs/screenshots/04_prediction_input.png)
+*Fasilitas input teks yang intuitif memungkinkan pengujian sistem secara seketika (*live inference*). Pengguna dapat mensimulasikan berbagai variasi kalimat siber untuk menguji batas ketangguhan (*robustness*) kecerdasan buatan.*
+
+### 7.5 Visualisasi Hasil (Prediction Result)
+![Prediction Result](docs/screenshots/05_prediction_result.png)
+*Setelah inferensi selesai, dasbor menyajikan hasil klasifikasi akhir yang didukung oleh indikator *Gauge Chart* interaktif untuk merepresentasikan tingkat keyakinan model (*Confidence Probability*).*
+
+### 7.6 Analisis Kesalahan (Error Analysis)
+![Error Analysis](docs/screenshots/06_error_analysis.png)
+*Menjunjung tinggi objektivitas ilmiah, sistem ini secara terbuka membedah kelemahannya sendiri. Panel ini menampilkan area di mana kecerdasan buatan gagal melakukan prediksi yang akurat, membantu penelitian lanjutan untuk mengisolasi ambiguitas semantik.*
+
+### 7.7 Transparansi Global (Global Explainability)
+![Global Explainability](docs/screenshots/07_global_xai.png)
+*Representasi visual dari parameter pembobotan TF-IDF berskala global. Grafik ini memetakan kosakata apa saja yang memiliki asosiasi gravitasi terkuat terhadap masing-masing kelas sentimen secara makro.*
+
+### 7.8 Evaluasi Sistem (About & System Analysis)
+![About & System Analysis](docs/screenshots/08_about.png)
+*Rangkuman analisis SWOT yang menjabarkan kelebihan (*Strengths*) dan batasan operasional (*Limitations*) dari arsitektur model NLP yang dikembangkan, memberikan konteks akademis yang utuh bagi para penguji riset.*
+
+<br><br>
+
+## BAB VIII: STRUKTUR REPOSITORI & DEPLOYMENT
 
 Proyek ini telah dikemas menjadi antarmuka web interaktif yang transparan, memungkinkan pengguna menguji teks apa pun secara seketika (*live preview*) dengan interpretasi algoritma otak AI.
 
-### 6.1 Struktur Direktori Proyek
+### 8.1 Struktur Direktori Proyek
 ```text
 UAS-PM/
 ├── data/
@@ -187,7 +225,7 @@ UAS-PM/
 └── requirements.txt     # Daftar dependencies
 ```
 
-### 7.2 Instruksi Eksekusi Peladen Lokal & Cloud (Deployment)
+### 8.2 Instruksi Eksekusi Peladen Lokal & Cloud (Deployment)
 
 **A. Akses Cloud Langsung (Live Demo)**  
 Aplikasi telah di-deploy secara publik dan dapat diuji coba tanpa instalasi melalui tautan berikut:  
