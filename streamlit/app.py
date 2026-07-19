@@ -46,6 +46,22 @@ EXPLAIN_DIR = BASE_REPORTS_DIR / "explainability"
 # ==========================================
 
 @st.cache_resource
+def load_lexicons():
+    def load_lex(filename):
+        path = DATA_DIR / "raw" / filename
+        if path.exists():
+            df = pd.read_csv(path)
+            col = df.columns[0]
+            return set(df[col].dropna().astype(str).str.lower().str.strip())
+        return set()
+    
+    abusive_lex = load_lex('abusive.csv')
+    harassment_lex = load_lex('harassment.csv')
+    insult_lex = load_lex('insult.csv')
+    threat_lex = load_lex('threat.csv')
+    return (abusive_lex, harassment_lex, insult_lex, threat_lex)
+
+@st.cache_resource
 def init_sastrawi():
     if not SASTRAWI_AVAILABLE:
         return None, None
@@ -117,7 +133,7 @@ def load_json(path):
             return json.load(f)
     return None
 
-def preprocess_text(text, stemmer, stopwords_list):
+def preprocess_text(text, stemmer, stopwords_list, lexicons):
     if not SASTRAWI_AVAILABLE:
         return text.lower() 
     text = text.lower()
@@ -127,7 +143,19 @@ def preprocess_text(text, stemmer, stopwords_list):
     text = re.sub(r'[^a-zA-Z\s]', ' ', text)
     text = re.sub(r'\s+', ' ', text).strip()
     words = text.split()
+    
+    # Inject Lexicon Tags
+    tags = []
+    abusive_lex, harassment_lex, insult_lex, threat_lex = lexicons
+    for w in words:
+        if w in abusive_lex: tags.append('tagabusive')
+        if w in harassment_lex: tags.append('tagharassment')
+        if w in insult_lex: tags.append('taginsult')
+        if w in threat_lex: tags.append('tagthreat')
+        
     words = [w for w in words if w not in stopwords_list]
+    words.extend(tags)
+    
     text = stemmer.stem(' '.join(words))
     return text
 
@@ -209,6 +237,7 @@ def render_prediction():
     models = load_all_models()
     vectorizer = load_tfidf_vectorizer()
     stemmer, stopwords = init_sastrawi()
+    lexicons = load_lexicons()
     xgb_mapping = load_xgb_mapping()
     meta = load_model_selection_meta()
     
@@ -239,7 +268,7 @@ def render_prediction():
             # --- SECTION 3: PREPROCESSING PREVIEW ---
             st.markdown("---")
             st.subheader("PREPROCESSING PREVIEW")
-            clean_text = preprocess_text(user_input, stemmer, stopwords)
+            clean_text = preprocess_text(user_input, stemmer, stopwords, lexicons)
             st.success(clean_text)
             
             if not clean_text.strip():
