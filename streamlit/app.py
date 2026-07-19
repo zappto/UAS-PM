@@ -253,7 +253,15 @@ def render_performance():
     st.subheader("Leaderboard Algoritma")
     eval_df = load_csv(BASE_REPORTS_DIR / "model_evaluation_results.csv")
     if eval_df is not None:
-        st.dataframe(eval_df.style.highlight_max(subset=['F1-Score', 'Accuracy'], color='lightgreen'), use_container_width=True)
+        st.dataframe(
+            eval_df.style.format({
+                'Accuracy': '{:.4f}', 
+                'Precision': '{:.4f}', 
+                'Recall': '{:.4f}', 
+                'F1-Score': '{:.4f}'
+            }).highlight_max(subset=['F1-Score', 'Accuracy'], color='#2e7d32'), 
+            use_container_width=True
+        )
         
         # Plot comparison
         st.subheader("Grafik Perbandingan F1-Score")
