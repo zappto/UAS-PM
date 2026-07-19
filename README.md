@@ -2,12 +2,12 @@
 
 *(Performance Analysis of Machine Learning Algorithms for Cyberbullying Type and Severity Classification in Indonesian Text Using TF-IDF)*
 
----
+<br><br>
 
 ## ABSTRAK
 Proyek ini mengusulkan sebuah *Machine Learning Pipeline* tingkat lanjut untuk menganalisis dan mengklasifikasikan jenis perundungan siber (*Cyberbullying*) pada teks berbahasa Indonesia. Mengingat tingginya dimensi *sparse matrix* dan masalah ambiguitas semantik pada bahasa informal (seperti ejaan salah dan *slang*), penelitian ini memadukan ekstraksi fitur **TF-IDF** dengan teknik **Lexicon Tagging** (Kamus Sentimen). Kami membandingkan tiga algoritma komputasi klasifikasi (*Logistic Regression*, *Linear SVM*, dan *XGBoost*). Hasil empiris menunjukkan bahwa algoritma **Linear SVM** mencapai performa tertinggi dengan tingkat *F1-Macro* sebesar 66.87%, mengatasi kendala ketidakseimbangan kelas (*class imbalance*). Penelitian ini juga mengimplementasikan LIME (*Local Interpretable Model-agnostic Explanations*) untuk memastikan transparansi pengambilan keputusan algoritma.
 
----
+<br><br>
 
 ## BAB I: PENDAHULUAN
 
@@ -24,7 +24,7 @@ Deteksi *cyberbullying* otomatis pada teks berbahasa Indonesia memiliki tantanga
 ### 1.3 Metrik Kesuksesan (Evaluasi)
 Mengingat distribusi dataset *cyberbullying* di alam liar sangat tidak seimbang (*imbalanced dataset*), maka metrik akurasi murni dianggap bias. Oleh karena itu, metrik objektif yang digunakan untuk mengevaluasi kemenangan model dalam penelitian ini adalah **F1-Macro Score**.
 
----
+<br><br>
 
 ## BAB II: TINJAUAN PUSTAKA
 
@@ -37,7 +37,7 @@ SVM adalah algoritma pembelajaran terarah (*supervised learning*) yang mencari *
 ### 2.3 Lexicon Tagging & LIME
 Penggunaan kamus leksikon kotor (*abusive/hate speech lexicon*) telah terbukti efektif mengarahkan bobot model pada area emosi negatif (Ibrohim & Budi, 2019). Sementara itu, untuk menghindari efek "Kotak Hitam" pada kecerdasan buatan, Ribeiro et al. (2016) memperkenalkan LIME (*Local Interpretable Model-agnostic Explanations*) yang mampu merunut balik probabilitas kata yang membuat model mengambil suatu keputusan klasifikasi.
 
----
+<br><br>
 
 ## BAB III: METODOLOGI PENELITIAN
 
@@ -78,7 +78,7 @@ Sebagai peretas kebuntuan (*workaround*) algoritma buta makna, teks dicocokkan d
 ### 3.3 Pemodelan & Tuning Ramah Lingkungan (Notebook 07-08)
 Kami melatih tiga model (*Logistic Regression, Linear SVM, XGBoost*). Pada tahap setel optimal (*Hyperparameter Tuning*), rekayasa sistem komputasi diterapkan secara presisi; pencarian dikarantina pada skala `n_jobs=2` dan `pre_dispatch=2`, memaksa proses *GridSearch* kebal terhadap ancaman memori bocor (*Memory Out of Memory*).
 
----
+<br><br>
 
 ## BAB IV: HASIL DAN PEMBAHASAN
 
@@ -125,7 +125,7 @@ LIME diimplementasikan untuk membongkar organ pemikiran mesin. Gambar di bawah m
 ![Top Words per Class](reports/explainability/top_words_per_class.png)
 *Gambar 3: Transparansi kata yang berkontribusi paling kuat terhadap keputusan prediksi.*
 
----
+<br><br>
 
 ## BAB V: KESIMPULAN DAN SARAN
 
@@ -137,7 +137,7 @@ Untuk mengelevasi limitasi performa saat ini pada penelitian mendatang, kami mer
 1. **Transisi ke Arsitektur Deep Learning**: Menggeser mesin hitung frekuensi kata (TF-IDF) menuju pemahaman konseptual dengan *Large Language Model* berbahasa Indonesia, seperti **IndoBERT**.
 2. **Implementasi SMOTE**: Menggunakan *Synthetic Minority Over-sampling Technique* (SMOTE) jika infrastruktur keras (*Hardware RAM*) memadai, guna secara artifisial menyeimbangkan populasi pada kelas perundungan ekstrem (*Threat* dan *Abusive*).
 
----
+<br><br>
 
 ## BAB VI: STRUKTUR REPOSITORI & DEPLOYMENT
 
@@ -169,7 +169,7 @@ UAS-PM/
 3. Jalankan perintah: `streamlit run streamlit/app.py`
 4. Antarmuka web akan beroperasi pada `http://localhost:8501`.
 
----
+<br><br>
 
 ## DAFTAR PUSTAKA
 
@@ -180,5 +180,5 @@ UAS-PM/
 5. Scikit-learn Developers. (2023). *Scikit-learn: Machine Learning in Python*. https://scikit-learn.org/
 6. Chen, T., & Guestrin, C. (2016). XGBoost: A Scalable Tree Boosting System. *Proceedings of the 22nd ACM SIGKDD*, 785-794.
 
----
+<br><br>
 *Proyek ini merupakan Capstone Ujian Akhir Semester Genap 2025/2026 Mata Kuliah Pembelajaran Mesin Universitas Dian Nuswantoro.*
