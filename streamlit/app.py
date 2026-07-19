@@ -82,7 +82,7 @@ def load_tfidf_vectorizer():
 
 @st.cache_data
 def load_model_selection_meta():
-    meta_path = BASE_REPORTS_DIR / "model_evaluation" / "model_selection.json"
+    meta_path = BASE_REPORTS_DIR / "model_selection.json"
     if meta_path.exists():
         with open(meta_path, 'r') as f:
             return json.load(f)
@@ -251,7 +251,7 @@ def render_performance():
         
     st.markdown("---")
     st.subheader("Leaderboard Algoritma")
-    eval_df = load_csv(BASE_REPORTS_DIR / "model_evaluation" / "model_evaluation_results.csv")
+    eval_df = load_csv(BASE_REPORTS_DIR / "model_evaluation_results.csv")
     if eval_df is not None:
         st.dataframe(eval_df.style.highlight_max(subset=['F1-Score', 'Accuracy'], color='lightgreen'), use_container_width=True)
         
