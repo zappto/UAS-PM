@@ -84,11 +84,18 @@ Kami melatih tiga model (*Logistic Regression, Linear SVM, XGBoost*). Pada tahap
 
 Berdasarkan tahap evaluasi terakhir (`reports/model_selection.json`), model **Linear SVM** mengungguli seluruh algoritma kompetitornya.
 
-### 4.1 Metrik Performa (Linear SVM)
-- **Accuracy**: 79.56%
-- **Precision**: 67.16%
-- **Recall**: 66.70%
-- **F1-Score (Macro)**: **66.87%**
+### 4.1 Metrik Performa Keseluruhan (Leaderboard Algoritma)
+Berikut adalah hasil uji silang komprehensif dari semua algoritma yang diuji. Linear SVM (*Baseline*) terbukti memberikan keseimbangan presisi tertinggi.
+
+| Rank | Model Algoritma | F1-Score (Macro) | Accuracy | Precision | Recall |
+|---|---|---|---|---|---|
+| 🥇 | **Linear SVM** (Baseline & Tuned) | **66.87%** | **79.56%** | **67.16%** | **66.70%** |
+| 🥈 | **Logistic Regression** (Tuned) | 66.38% | 77.43% | 64.76% | 68.37% |
+| 🥉 | **Logistic Regression** (Baseline) | 66.03% | 74.67% | 62.67% | 72.27% |
+| 4 | **XGBoost** (Tuned) | 62.63% | 81.17% | 75.70% | 58.14% |
+| 5 | **XGBoost** (Baseline) | 61.35% | 80.76% | 75.04% | 56.87% |
+
+*Catatan: XGBoost mencetak skor akurasi (81%) tertinggi karena secara brutal menebak kelas mayoritas (Normal), namun gagal total membedakan kelas minoritas (Recall 56.8%), yang menyebabkannya terlempar dari peringkat atas metrik objektif F1-Macro.*
 
 ### 4.2 Analisis Kemenangan Algoritma & Matriks Kebingungan
 Perolehan F1-Macro Score sebesar ~66.8% membuktikan bahwa model Linear SVM mampu menyeimbangkan prediksi pada kelas mayoritas dan minoritas dengan presisi yang sangat baik dibandingkan XGBoost. Tabiat bawaan Linear SVM terlahir untuk menembus matriks *sparse*. Di tengah 60.000 kolom kata, model ini mampu melacak batas margin pemisah dengan efisiensi yang nyaris sempurna tanpa mengalami *overfitting*.
