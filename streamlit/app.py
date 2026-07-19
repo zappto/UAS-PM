@@ -344,13 +344,13 @@ def render_prediction():
             for w in words_raw:
                 clean_w = re.sub(r'[^a-zA-Z]', '', w.lower())
                 if clean_w in threat_lex:
-                    annotated_words.extend([w + " ", ("Threat", "💀", "#4a148c"), " "])
+                    annotated_words.append((w + " ", "Threat 💀", "#4a148c"))
                 elif clean_w in harassment_lex:
-                    annotated_words.extend([w + " ", ("Harassment", "🟡", "#f57f17"), " "])
+                    annotated_words.append((w + " ", "Harassment 🟡", "#f57f17"))
                 elif clean_w in insult_lex:
-                    annotated_words.extend([w + " ", ("Insult", "🟠", "#e65100"), " "])
+                    annotated_words.append((w + " ", "Insult 🟠", "#e65100"))
                 elif clean_w in abusive_lex:
-                    annotated_words.extend([w + " ", ("Abusive", "🔴", "#c62828"), " "])
+                    annotated_words.append((w + " ", "Abusive 🔴", "#c62828"))
                 else:
                     annotated_words.append(w + " ")
             
