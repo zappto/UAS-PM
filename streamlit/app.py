@@ -21,6 +21,7 @@ try:
     import seaborn as sns
     import plotly.express as px
     import plotly.graph_objects as go
+    from annotated_text import annotated_text
     LIME_AVAILABLE = True
 except ImportError:
     LIME_AVAILABLE = False
@@ -330,10 +331,36 @@ def render_prediction():
             
         with st.spinner("Memproses teks dan menjalankan komputasi model..."):
             
-            # --- SECTION 2: ORIGINAL TEXT ---
+            # --- SECTION 2: ORIGINAL TEXT & REAL-TIME HIGHLIGHTER ---
             st.markdown("---")
-            st.subheader("ORIGINAL TEXT")
-            st.info(user_input)
+            st.subheader("TEXT HIGHLIGHTER (Lexicon Scanner)")
+            st.markdown("Sistem memindai kata-kata dalam teks Anda yang terindikasi secara leksikal sebagai ujaran kebencian atau perundungan sebelum masuk ke mesin AI.")
+            
+            # Interactive Annotated Text (Grammarly-style for Cyberbullying)
+            words_raw = user_input.split()
+            annotated_words = []
+            abusive_lex, harassment_lex, insult_lex, threat_lex = lexicons
+            
+            for w in words_raw:
+                clean_w = re.sub(r'[^a-zA-Z]', '', w.lower())
+                if clean_w in threat_lex:
+                    annotated_words.extend([w + " ", ("Threat", "💀", "#4a148c"), " "])
+                elif clean_w in harassment_lex:
+                    annotated_words.extend([w + " ", ("Harassment", "🟡", "#f57f17"), " "])
+                elif clean_w in insult_lex:
+                    annotated_words.extend([w + " ", ("Insult", "🟠", "#e65100"), " "])
+                elif clean_w in abusive_lex:
+                    annotated_words.extend([w + " ", ("Abusive", "🔴", "#c62828"), " "])
+                else:
+                    annotated_words.append(w + " ")
+            
+            # Render the annotated text block
+            st.markdown("<div style='background-color: rgba(255,255,255,0.05); padding: 20px; border-radius: 10px;'>", unsafe_allow_html=True)
+            try:
+                annotated_text(*annotated_words)
+            except Exception:
+                st.info(user_input) # Fallback if annotated_text fails
+            st.markdown("</div>", unsafe_allow_html=True)
             
             # --- SECTION 3: PREPROCESSING PREVIEW ---
             st.markdown("---")
