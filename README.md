@@ -2,6 +2,8 @@
 
 *(Performance Analysis of Machine Learning Algorithms for Cyberbullying Type and Severity Classification in Indonesian Text Using TF-IDF)*
 
+**🌐 LIVE DEMO APLIKASI:** [**https://uas-pm.streamlit.app/**](https://uas-pm.streamlit.app/)
+
 <br><br>
 
 ## ABSTRAK
@@ -185,7 +187,13 @@ UAS-PM/
 └── requirements.txt     # Daftar dependencies
 ```
 
-### 6.2 Instruksi Eksekusi Peladen Lokal (Deployment)
+### 7.2 Instruksi Eksekusi Peladen Lokal & Cloud (Deployment)
+
+**A. Akses Cloud Langsung (Live Demo)**  
+Aplikasi telah di-deploy secara publik dan dapat diuji coba tanpa instalasi melalui tautan berikut:  
+👉 **[https://uas-pm.streamlit.app/](https://uas-pm.streamlit.app/)**
+
+**B. Menjalankan secara Lokal**
 1. Buka Terminal dan navigasikan ke direktori akar (root) repositori ini.
 2. Pastikan pustaka di `requirements.txt` terpasang.
 3. Jalankan perintah: `streamlit run streamlit/app.py`
