@@ -202,10 +202,10 @@ def render_performance():
         st.info("Comparison leaderboard not available.")
 
 def render_prediction():
-    st.title("🔬 Deep Live Prediction & Explainability Analysis")
-    st.markdown("Analisis mendalam teks menggunakan **perbandingan 3 model sekaligus** dan bedah kata (XAI LIME).")
+    st.title("🔬 Text Analysis & Prediction")
     st.markdown("---")
     
+    # Load Artifacts
     models = load_all_models()
     vectorizer = load_tfidf_vectorizer()
     stemmer, stopwords = init_sastrawi()
@@ -213,107 +213,135 @@ def render_prediction():
     meta = load_model_selection_meta()
     
     if not models or not vectorizer:
-        st.error("Missing Models or Vectorizer.")
+        st.error("Required model artifact not found. Please complete the previous pipeline stage first.")
         return
         
     champ_model_name = meta.get('selected_model') if meta else list(models.keys())[0]
+    champ_model = models.get(champ_model_name, list(models.values())[0])
     
+    st.header("TEXT ANALYSIS")
     with st.form("prediction_form"):
-        user_input = st.text_area("Masukkan teks Bahasa Indonesia untuk dianalisis...", height=100)
-        submitted = st.form_submit_button("Analisis Mendalam 🚀")
+        user_input = st.text_area("Masukkan teks Bahasa Indonesia yang ingin dianalisis...", height=150)
+        submitted = st.form_submit_button("Analisis Teks")
         
     if submitted:
-        if not user_input.strip():
-            st.error("Teks tidak boleh kosong!")
+        if not user_input or not user_input.strip():
+            st.warning("Teks tidak boleh kosong! Silakan masukkan teks yang valid.")
             return
             
-        with st.spinner("Memproses teks, menjalankan komputasi 3 model, dan membangun LIME Explainer..."):
-            clean_text = preprocess_text(user_input, stemmer, stopwords)
-            X_vec = vectorizer.transform([clean_text])
+        with st.spinner("Memproses teks dan menjalankan komputasi model..."):
             
-            # --- 1. MODEL COMPARISON ---
-            st.subheader("1. Perbandingan Keputusan Model")
-            st.info(f"**Teks setelah dibersihkan (Preprocessed):** '{clean_text}'")
-            
-            comp_data = []
-            for m_name, m in models.items():
-                pred_raw = m.predict(X_vec)[0]
-                is_xgb = 'xgboost' in m_name.lower()
-                
-                # Class Mapping
-                if is_xgb and xgb_mapping:
-                    predicted_class = xgb_mapping.get(pred_raw, str(pred_raw))
-                    classes = [xgb_mapping.get(i, str(i)) for i in range(len(xgb_mapping))]
-                else:
-                    predicted_class = pred_raw
-                    classes = list(m.classes_)
-                    
-                # Probs
-                probs = get_probabilities(m, X_vec)
-                confidence = f"{np.max(probs)*100:.2f}%" if probs is not None else "N/A"
-                
-                is_champ = "🏆 Champion" if m_name == champ_model_name else ""
-                comp_data.append({
-                    "Model": f"{m_name} {is_champ}",
-                    "Prediksi Kelas": predicted_class,
-                    "Confidence": confidence
-                })
-                
-            comp_df = pd.DataFrame(comp_data)
-            st.table(comp_df)
-            
-            # --- 2. XAI LIME ANALYSIS (On Champion Model) ---
+            # --- SECTION 2: ORIGINAL TEXT ---
             st.markdown("---")
-            st.subheader(f"2. Analisis LIME (Model Pemenang: `{champ_model_name}`)")
+            st.subheader("ORIGINAL TEXT")
+            st.info(user_input)
             
-            if LIME_AVAILABLE and len(clean_text.split()) > 0:
-                champ_model = models.get(champ_model_name, list(models.values())[0])
-                is_xgb_champ = 'xgboost' in champ_model_name.lower()
+            # --- SECTION 3: PREPROCESSING PREVIEW ---
+            st.markdown("---")
+            st.subheader("PREPROCESSING PREVIEW")
+            clean_text = preprocess_text(user_input, stemmer, stopwords)
+            st.success(clean_text)
+            
+            if not clean_text.strip():
+                st.error("Semua kata dibuang saat preprocessing (hanya berisi simbol/stopword). Analisis dihentikan.")
+                return
+            
+            # --- SECTION 4: TF-IDF REPRESENTATION ---
+            st.markdown("---")
+            st.subheader("TF-IDF REPRESENTATION")
+            X_vec = vectorizer.transform([clean_text])
+            feature_names = vectorizer.get_feature_names_out()
+            
+            # Extract non-zero elements
+            non_zero_indices = X_vec.nonzero()[1]
+            if len(non_zero_indices) == 0:
+                st.warning("Tidak ada kata dalam teks Anda yang dikenali oleh model (Out of Vocabulary).")
+            else:
+                tfidf_data = []
+                for idx in non_zero_indices:
+                    tfidf_data.append({
+                        "Feature": feature_names[idx],
+                        "TF-IDF Score": X_vec[0, idx]
+                    })
+                df_tfidf = pd.DataFrame(tfidf_data).sort_values(by="TF-IDF Score", ascending=False).head(10)
+                st.write(f"Total fitur dikenali: **{len(non_zero_indices)}** (Menampilkan maksimal top 10 fitur tertinggi)")
+                st.table(df_tfidf.set_index("Feature"))
+            
+            # Prepare Model Mapping
+            is_xgb_champ = 'xgboost' in champ_model_name.lower()
+            if is_xgb_champ and xgb_mapping:
+                class_names = [xgb_mapping.get(i, str(i)) for i in range(len(xgb_mapping))]
+            else:
+                class_names = list(champ_model.classes_)
+            
+            pred_raw = champ_model.predict(X_vec)[0]
+            if is_xgb_champ and xgb_mapping:
+                predicted_class = xgb_mapping.get(pred_raw, str(pred_raw))
+            else:
+                predicted_class = pred_raw
                 
-                if is_xgb_champ and xgb_mapping:
-                    class_names = [xgb_mapping.get(i, str(i)) for i in range(len(xgb_mapping))]
-                else:
-                    class_names = list(champ_model.classes_)
+            probs = get_probabilities(champ_model, X_vec)
+            confidence = np.max(probs) if probs is not None else None
+            
+            # --- SECTION 5: PREDICTION RESULT ---
+            st.markdown("---")
+            st.subheader("PREDICTION RESULT")
+            st.markdown(f"**Predicted Type:** `{predicted_class}`")
+            st.markdown(f"**Model:** `{champ_model_name}`")
+            if confidence is not None:
+                st.markdown(f"**Model Confidence:** `{confidence*100:.2f}%`")
                 
-                # LIME needs a pipeline function
+            # --- SECTION 7: PROBABILITY DISTRIBUTION ---
+            st.markdown("---")
+            st.subheader("PROBABILITY DISTRIBUTION")
+            if probs is not None:
+                prob_df = pd.DataFrame({'Class': class_names, 'Probability': probs})
+                prob_df = prob_df.sort_values(by='Probability', ascending=True)
+                
+                fig_prob, ax_prob = plt.subplots(figsize=(8, max(3, len(class_names)*0.5)))
+                ax_prob.barh(prob_df['Class'], prob_df['Probability'] * 100, color='skyblue')
+                ax_prob.set_xlabel('Probability (%)')
+                st.pyplot(fig_prob)
+            else:
+                st.info("Probability distribution is not available for this model.")
+                
+            # --- SECTION 9/10: MODEL EXPLANATION (LIME) ---
+            st.markdown("---")
+            st.subheader("MODEL EXPLANATION")
+            
+            if LIME_AVAILABLE and len(non_zero_indices) > 0:
                 def lime_pipeline(texts):
                     X = vectorizer.transform(texts)
                     if hasattr(champ_model, "predict_proba"):
                         return champ_model.predict_proba(X)
                     else:
-                        # Fallback for SVM
                         dec = champ_model.decision_function(X)
                         exp_d = np.exp(dec - np.max(dec, axis=1, keepdims=True))
                         return exp_d / np.sum(exp_d, axis=1, keepdims=True)
 
                 explainer = LimeTextExplainer(class_names=class_names)
-                # Explain the cleaned text
                 exp = explainer.explain_instance(clean_text, lime_pipeline, num_features=10, top_labels=1)
-                pred_label_idx = exp.available_labels()[0]
-                pred_label_name = class_names[pred_label_idx]
                 
-                st.markdown(f"**Prediksi Akhir Model Pemenang:** `{pred_label_name}`")
+                pred_label_idx = exp.available_labels()[0]
                 
                 # Render HTML LIME in Streamlit
                 components.html(exp.as_html(), height=350, scrolling=True)
                 
-                # Render Bar Chart
-                st.markdown("### Beban Kata (Feature Weights)")
-                st.write(f"Grafik di bawah menunjukkan kata apa yang mendorong model memprediksi **{pred_label_name}** (Positif/Biru) dan kata apa yang justru membantah prediksi tersebut (Negatif/Oranye).")
-                
+                st.markdown("#### Fitur yang Berkontribusi terhadap Prediksi")
                 word_weights = exp.as_list(label=pred_label_idx)
                 if word_weights:
-                    df_weights = pd.DataFrame(word_weights, columns=['Kata', 'Bobot'])
-                    df_weights['Arah'] = df_weights['Bobot'].apply(lambda x: 'Mendukung Prediksi' if x > 0 else 'Membantah Prediksi')
-                    
-                    fig, ax = plt.subplots(figsize=(8, max(4, len(df_weights)*0.5)))
-                    sns.barplot(data=df_weights, x='Bobot', y='Kata', hue='Arah', palette={'Mendukung Prediksi': 'royalblue', 'Membantah Prediksi': 'coral'}, ax=ax)
-                    ax.set_title(f"Kontribusi Kata terhadap prediksi '{pred_label_name}'")
-                    st.pyplot(fig)
-            elif len(clean_text.split()) == 0:
-                st.warning("Teks setelah di-preprocessing kosong (semua kata dibuang karena dianggap tidak bermakna/stopword).")
+                    df_weights = pd.DataFrame(word_weights, columns=['Feature', 'Contribution'])
+                    df_weights['Contribution'] = df_weights['Contribution'].apply(lambda x: f"{x:+.4f}")
+                    st.table(df_weights.set_index('Feature'))
+                
+                # --- SECTION 11: INTERPRETATION TEXT ---
+                st.markdown("---")
+                st.subheader("INTERPRETATION")
+                top_features = ", ".join([w[0] for w in word_weights[:3]]) if word_weights else "tidak ada fitur kuat yang terdeteksi"
+                conf_text = f"dengan tingkat probabilitas {confidence*100:.2f}%" if confidence is not None else ""
+                st.info(f"Model memprediksi kategori **{predicted_class}** {conf_text}. Prediksi ini secara signifikan dipengaruhi oleh kehadiran kata/fitur seperti **{top_features}**. Perlu dicatat bahwa eksplanasi fitur ini mencerminkan asosiasi matematis yang dipelajari oleh algoritma dari data latih, dan tidak selalu menyiratkan hubungan sebab-akibat secara langsung dalam bahasa manusia.")
             else:
-                st.warning("Library LIME tidak tersedia. Harap install dengan `pip install lime`.")
+                st.info("LIME Explainability tidak dapat dijalankan (Mungkin OOV atau library tidak tersedia).")
 
 def render_error_analysis():
     st.title("🕵️ Error Analysis")
