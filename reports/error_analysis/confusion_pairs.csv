@@ -1,0 +1,13 @@
+actual_label,predicted_label,error_count,percent_of_total_errors
+harassment,normal,410,31.131359149582384
+normal,harassment,333,25.28473804100228
+normal,hate_speech,153,11.617312072892938
+hate_speech,normal,135,10.250569476082005
+insult,hate_speech,62,4.707668944570995
+hate_speech,insult,56,4.25208807896735
+harassment,hate_speech,49,3.7205770690964313
+normal,insult,39,2.9612756264236904
+insult,normal,34,2.58162490508732
+hate_speech,harassment,29,2.201974183750949
+insult,harassment,9,0.683371298405467
+harassment,insult,8,0.6074411541381929

@@ -1,0 +1,5 @@
+Class,Support,Misclassified,Error_Rate_Percent
+harassment,772,467,60.49222797927462
+insult,262,105,40.0763358778626
+hate_speech,1072,220,20.522388059701495
+normal,4337,525,12.105141803089694

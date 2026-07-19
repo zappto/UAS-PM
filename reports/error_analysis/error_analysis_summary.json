@@ -1,0 +1,10 @@
+{
+    "analyzed_model": "linear_svm_baseline",
+    "total_test_samples": 6443,
+    "total_errors": 1317,
+    "overall_error_rate_percent": 20.44,
+    "highest_error_class": "harassment",
+    "highest_error_class_rate": 60.49,
+    "top_confusion_pair": "Actual harassment -> Predicted normal",
+    "high_confidence_errors_count": 132
+}

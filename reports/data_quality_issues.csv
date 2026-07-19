@@ -1,0 +1,3 @@
+Issue,Count,Recommended Next Step
+Missing Text,10,Remove rows with missing text in preprocessing.
+Conflicting Labels for same Text,1337,Resolve conflicts during the Validation stage.

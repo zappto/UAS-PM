@@ -1,0 +1,21 @@
+{
+    "input_path": "/home/zapp/Kampus/PM-NEW/data/validated/validated_cyberbullying_dataset.csv",
+    "output_path": "/home/zapp/Kampus/PM-NEW/data/processed/processed_cyberbullying_dataset.csv",
+    "initial_rows": 42954,
+    "final_rows": 42952,
+    "dropped_empty_rows": 2,
+    "applied_steps": [
+        "Lowercasing",
+        "URL Removal",
+        "HTML Removal",
+        "Username Replacement (USER_MENTION)",
+        "Hashtag Strip (Keep word)",
+        "Punctuation Removal",
+        "Whitespace Normalization"
+    ],
+    "skipped_steps": [
+        "Stopword Removal (Skipped to preserve negation)",
+        "Stemming (Skipped to preserve slang)",
+        "Repeated Character Normalization (Skipped to preserve emotion)"
+    ]
+}

@@ -1,0 +1,13 @@
+check_id,check_name,category,status,severity,affected_count,details,recommendation
+V_SCH_01,Dataset Not Empty,Schema,PASS,INFO,0,Dataset contains 42954 rows.,None
+V_COL_01,Required Columns Exist,Columns,PASS,INFO,0,All required columns are present.,None
+V_TYP_01,Label Data Type,Data Types,PASS,INFO,0,cyberbullying_type type is valid.,None
+V_NA_01,Missing Text,Missing Values,PASS,INFO,0,No null texts.,None
+V_NA_02,Missing Labels,Missing Values,PASS,INFO,0,No null labels.,None
+V_TXT_01,Text Integrity,Text,PASS,INFO,0,Text integrity checks passed.,None
+V_DUP_01,Conflicting Label Duplicates,Duplicates,PASS,INFO,0,No conflicting labels.,None
+V_DUP_02,Exact Row Duplicates,Duplicates,PASS,INFO,0,No exact duplicates.,None
+V_LBL_01,Taxonomy Compliance,Labels,PASS,INFO,0,All labels comply with official taxonomy.,None
+V_LBL_02,Missing Target Classes,Labels,WARNING,WARNING,1,Classes missing from data: ['threat'],Note for model evaluation limitations.
+V_AUD_01,Audit Trail Exists,Provenance,PASS,INFO,0,Audit trail found.,None
+V_PRV_01,Provenance Completeness,Provenance,PASS,INFO,0,Provenance data is complete.,None

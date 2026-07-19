@@ -1,0 +1,7 @@
+dataset_id,file_name,source_name,source_url,dataset_description,original_language,original_format,license,license_url,acquisition_date,original_row_count,original_column_count,text_column_candidate,label_column_candidate,type_label_available,severity_label_available,notes,limitations
+DS_02,abusive.csv,To be documented,To be documented,To be documented,Indonesian,.csv,To be documented,To be documented,2026-07-19,125,1,Unknown,Unknown,Needs Review,Needs Review,None,None
+DS_03,cyberbullying_cleaned_indo.csv,To be documented,To be documented,To be documented,Indonesian,.csv,To be documented,To be documented,2026-07-19,2400,3,tweet_text_id,cyberbullying_type,Needs Review,Needs Review,None,None
+DS_04,data.csv,To be documented,To be documented,To be documented,Indonesian,.csv,To be documented,To be documented,2026-07-19,13169,13,tweet,Unknown,Needs Review,Needs Review,None,None
+DS_05,indotoxic2024_annotated_data_v2_final.csv,To be documented,To be documented,To be documented,Indonesian,.csv,To be documented,To be documented,2026-07-19,28448,14,text_id,Unknown,Needs Review,Needs Review,None,None
+DS_06,kamus_singkatan.csv,To be documented,To be documented,To be documented,Indonesian,.csv,To be documented,To be documented,2026-07-19,1503,3,Unknown,Unknown,Needs Review,Needs Review,None,None
+DS_07,new_kamusalay.csv,To be documented,To be documented,To be documented,Indonesian,.csv,To be documented,To be documented,2026-07-19,15166,2,Unknown,Unknown,Needs Review,Needs Review,None,None

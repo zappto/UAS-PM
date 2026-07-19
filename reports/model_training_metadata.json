@@ -1,0 +1,26 @@
+[
+    {
+        "model_name": "logistic_regression_baseline",
+        "algorithm": "LogisticRegression",
+        "training_samples": 30066,
+        "feature_dimensions": 35222,
+        "training_duration_seconds": 13.440165519714355,
+        "random_state": 42
+    },
+    {
+        "model_name": "linear_svm_baseline",
+        "algorithm": "LinearSVC",
+        "training_samples": 30066,
+        "feature_dimensions": 35222,
+        "training_duration_seconds": 1.462597131729126,
+        "random_state": 42
+    },
+    {
+        "model_name": "xgboost_baseline",
+        "algorithm": "XGBClassifier",
+        "training_samples": 30066,
+        "feature_dimensions": 35222,
+        "training_duration_seconds": 71.6961567401886,
+        "random_state": 42
+    }
+]

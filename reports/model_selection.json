@@ -1,0 +1,13 @@
+{
+    "selected_model": "linear_svm_baseline",
+    "target": "cyberbullying_type",
+    "selection_criteria": "Highest Macro F1-Score on unseen test data",
+    "final_metrics": {
+        "accuracy": 0.795592115474158,
+        "precision": 0.6716524555025566,
+        "recall": 0.667009765700179,
+        "f1_score": 0.6687768111793216,
+        "roc_auc": null
+    },
+    "reason": "Demonstrated the best balance in classifying both majority and minority cyberbullying types without overfitting."
+}

@@ -1,0 +1,51 @@
+{
+    "merging_date": "2026-07-19 13:55:18",
+    "input_datasets": [
+        "cyberbullying_cleaned_indo.csv",
+        "indotoxic2024_annotated_data_v2_final.csv",
+        "data.csv",
+        "abusive.csv",
+        "kamus_singkatan.csv",
+        "new_kamusalay.csv"
+    ],
+    "input_row_counts": {
+        "cyberbullying_cleaned_indo.csv": 2400,
+        "indotoxic2024_annotated_data_v2_final.csv": 28448,
+        "data.csv": 13169,
+        "abusive.csv": 125,
+        "kamus_singkatan.csv": 1503,
+        "new_kamusalay.csv": 15166
+    },
+    "output_row_count": 44017,
+    "output_columns": [
+        "text",
+        "cyberbullying_type",
+        "severity_level",
+        "source_dataset",
+        "source_file",
+        "original_row_id"
+    ],
+    "column_mappings": {
+        "cyberbullying_cleaned_indo.csv": {
+            "text": "clean_text",
+            "cyberbullying_type": "cyberbullying_type",
+            "severity_level": null
+        },
+        "indotoxic2024_annotated_data_v2_final.csv": {
+            "text": "text",
+            "cyberbullying_type": "toxicity",
+            "severity_level": null
+        },
+        "data.csv": {
+            "text": "Tweet",
+            "cyberbullying_type": "custom_label",
+            "severity_level": null
+        }
+    },
+    "source_provenance_fields": [
+        "source_dataset",
+        "source_file",
+        "original_row_id"
+    ],
+    "output_file_path": "data/merged/merged_cyberbullying_dataset.csv"
+}

@@ -1,0 +1,7 @@
+dataset_id,file_name,extension,file_size_bytes,file_path,last_modified,file_hash
+DS_02,abusive.csv,.csv,975,data/raw/abusive.csv,2026-07-15 02:52:14,d82db41526e4065fb3ff2825b6ce859339cd47802396460d497527b73ddb5cd3
+DS_03,cyberbullying_cleaned_indo.csv,.csv,662886,data/raw/cyberbullying_cleaned_indo.csv,2026-07-09 06:37:10,a43326cbcf54fdc399aeca6390dba94e204414ff252d995fc902d111f25b7d2f
+DS_04,data.csv,.csv,1858473,data/raw/data.csv,2020-04-15 14:27:10,44c04e31ad4b7ee4a95f1884e7af4da2c44b69762143eb2de0ede7f90502735e
+DS_05,indotoxic2024_annotated_data_v2_final.csv,.csv,13589262,data/raw/indotoxic2024_annotated_data_v2_final.csv,2026-07-15 02:57:24,64e6f1b317f2aa05ae6077a4a75821715af5dcc8aac6d3c55ff866194a918332
+DS_06,kamus_singkatan.csv,.csv,28690,data/raw/kamus_singkatan.csv,2026-07-09 06:35:53,044adddb761c57ecb3e8e02acf2c0e1f93fc27c740f1b88228626308daae5ea3
+DS_07,new_kamusalay.csv,.csv,285941,data/raw/new_kamusalay.csv,2026-07-15 02:52:20,fe00f0c728ee8ecc40dca3c3001ff2701dba7d4417a4178fe5b5745243564f9d

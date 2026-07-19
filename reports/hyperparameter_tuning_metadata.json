@@ -1,0 +1,32 @@
+{
+    "random_state": 42,
+    "cv_strategy": "StratifiedKFold",
+    "cv_splits": 5,
+    "scoring_metric": "f1_macro",
+    "logistic_regression": {
+        "best_params": {
+            "C": 10.0,
+            "class_weight": "balanced",
+            "solver": "lbfgs"
+        },
+        "best_cv_score": 0.6767096496472205
+    },
+    "linear_svm": {
+        "best_params": {
+            "C": 1.0,
+            "class_weight": "balanced",
+            "loss": "squared_hinge"
+        },
+        "best_cv_score": 0.6772404127603548
+    },
+    "xgboost": {
+        "best_params": {
+            "subsample": 1.0,
+            "n_estimators": 200,
+            "max_depth": 6,
+            "learning_rate": 0.2,
+            "colsample_bytree": 0.8
+        },
+        "best_cv_score": 0.628643978052583
+    }
+}

@@ -1,0 +1,6 @@
+{
+    "harassment": 0,
+    "hate_speech": 1,
+    "insult": 2,
+    "normal": 3
+}
