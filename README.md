@@ -96,16 +96,16 @@ Berikut adalah hasil uji silang komprehensif dari semua algoritma yang diuji. Li
 | 5 | **XGBoost** (Baseline) | 61.35% | 80.76% | 75.04% | 56.87% |
 
 ### 4.2 Diskusi Komparatif Algoritma (Model Benchmarking Analysis)
-Jika kita membedah tabel komparasi di atas secara mikroskopis, terdapat beberapa fenomena *Machine Learning* yang sangat menarik dan krusial:
+Berdasarkan analisis komprehensif terhadap metrik kinerja, terdapat beberapa pola inferensi model yang signifikan sebagai berikut:
 
-1. **Paradoks Akurasi vs. Objektivitas Kelas (Kasus XGBoost)**  
-   Sekilas, XGBoost (*Tuned*) tampak memiliki skor **Akurasi tertinggi (81.17%)**. Namun, mengapa ia berada di peringkat terbawah? Hal ini disebabkan oleh sifat dasar dataset perundungan yang *Imbalanced* (berat sebelah). XGBoost cenderung mengambil "jalan pintas" secara probabilistik dengan menebak mayoritas kalimat sebagai kelas dominan (misal: *Normal* atau *Aman*). Strategi ini meledakkan skor Akurasi keseluruhan, namun menghancurkan nilai **Recall (58.14%)**. Artinya, banyak sekali kalimat pelecehan/ancaman berbahaya (*minoritas*) yang gagal dideteksi oleh XGBoost dan dibiarkan lolos. Dalam konteks sistem moderasi konten nyata, ini adalah kegagalan fatal.
+1. **Paradoks Akurasi dan Bias Kelas (XGBoost)**  
+   Meskipun model XGBoost (*Tuned*) menghasilkan metrik **Akurasi tertinggi (81.17%)**, performa tersebut tidak mencerminkan efektivitas klasifikasi secara utuh akibat distribusi dataset yang tidak seimbang (*class imbalance*). Model cenderung mengoptimalkan prediksi pada kelas mayoritas (*Normal*), yang secara artifisial meningkatkan akurasi namun mengakibatkan penurunan metrik **Recall (58.14%)**. Hal ini mengindikasikan adanya limitasi signifikan dalam mengidentifikasi sampel kelas minoritas, yang merupakan aspek krusial dalam sistem moderasi konten.
 
-2. **Sensitivitas Berlebih (Kasus Logistic Regression)**  
-   Kebalikan dari XGBoost, *Logistic Regression* (khususnya varian *Baseline*) mencetak skor **Recall tertinggi (72.27%)**. Algoritma ini sangat "paranoia" dan sensitif. Ia berhasil menjaring hampir seluruh varian kalimat yang berpotensi perundungan (sangat sedikit kebobolan). Namun komprominya, **Precision**-nya terkorbankan (turun ke 62.67%). Hal ini berarti terjadi banyak kasus *False Positive*, di mana kalimat yang sebenarnya hanya candaan biasa ikut terhapus atau diblokir oleh sistem karena dianggap agresif.
+2. **Dinamika Sensitivitas Model (Logistic Regression)**  
+   *Logistic Regression* (varian *Baseline*) menunjukkan tingkat sensitivitas yang tinggi dengan mencapai skor **Recall tertinggi (72.27%)**. Algoritma ini memiliki kapabilitas yang baik dalam menjaring varian teks perundungan; namun, hal ini berbanding terbalik dengan metrik **Precision** yang menurun menjadi 62.67%. Penurunan presisi ini mengindikasikan adanya peningkatan rasio *False Positive*, di mana teks non-agresif cenderung terklasifikasi secara keliru sebagai konten perundungan.
 
-3. **Sang Pemenang: Keseimbangan Ekstrem (Linear SVM)**  
-   Inilah alasan mengapa **Linear SVM** dinobatkan sebagai arsitektur juara. Linear SVM tidak menjuarai *Accuracy* murni (79.56%), dan juga tidak menjuarai *Recall* (66.70%). Akan tetapi, algoritma ini menawarkan titik ekuilibrium (keseimbangan) **F1-Macro (66.87%)** yang paling sehat antara sensitivitas dan kepresisian. SVM berhasil menarik *hyperplane* pembatas antar-kelas pada dimensi matriks TF-IDF secara proporsional. Ia tidak mengabaikan kelas minoritas, namun juga tidak terlalu sensitif menghukum kelas candaan normal. 
+3. **Optimasi Keseimbangan Model (Linear SVM)**  
+   Hasil evaluasi menunjukkan bahwa **Linear SVM** merepresentasikan arsitektur klasifikasi yang paling optimal. Dengan mencapai skor **F1-Macro (66.87%)**, model ini berhasil menjaga ekuilibrium antara sensitivitas dan presisi. Penggunaan *hyperplane* pada dimensi ruang fitur TF-IDF memungkinkan Linear SVM mengklasifikasikan kelas minoritas dengan lebih proporsional tanpa mengorbankan integritas prediksi pada kelas mayoritas.
 
 ### 4.3 Matriks Kebingungan (Confusion Matrix)
 Visualisasi berikut membuktikan performa Linear SVM. Konsentrasi warna pada diagonal vertikal membuktikan bahwa SVM cukup percaya diri meletakkan prediksi pada kelas yang tepat, tanpa mengalami kebutaan total pada kelas minoritas berukuran sangat kecil seperti *Threat* (Ancaman).
@@ -114,13 +114,13 @@ Visualisasi berikut membuktikan performa Linear SVM. Konsentrasi warna pada diag
 *Gambar 1: Matriks Kebingungan (Confusion Matrix) Linear SVM.*
 
 ### 4.4 Analisis Kesalahan (Error Analysis)
-Setiap model di-interogasi objektivitasnya. Visualisasi distribusi kesalahan (Error Analysis) di bawah mengidentifikasi dengan jelas area leksikal di mana kecerdasan buatan masih mengalami kesulitan membedakan sarkasme ganda.
+Setiap model dievaluasi lebih lanjut melalui analisis kesalahan objektif (*Error Analysis*). Visualisasi distribusi kegagalan prediksi di bawah ini mengidentifikasi batasan leksikal linguistik yang masih menjadi tantangan bagi model AI, khususnya pada aspek ambiguitas semantik dan sarkasme.
 
 ![Error Rate by Class](reports/error_analysis/error_rate_by_class.png)
 *Gambar 2: Peta Distribusi Kesalahan Prediksi.*
 
 ### 4.5 Interpretasi Model (LIME Explainability)
-LIME diimplementasikan untuk membongkar organ pemikiran mesin. Gambar di bawah membuktikan secara logis kata spesifik apa saja yang memicu model untuk menjatuhkan vonis klasifikasi perundungan.
+Pendekatan LIME (Local Interpretable Model-agnostic Explanations) diimplementasikan untuk menganalisis transparansi inferensi mesin (*XAI*). Grafik representasi di bawah mendemonstrasikan secara empiris kata-kata spesifik (fitur) yang memiliki kontribusi probabilitas paling signifikan terhadap penentuan keputusan klasifikasi.
 
 ![Top Words per Class](reports/explainability/top_words_per_class.png)
 *Gambar 3: Transparansi kata yang berkontribusi paling kuat terhadap keputusan prediksi.*
