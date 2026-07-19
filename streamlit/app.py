@@ -1,4 +1,5 @@
 import streamlit as st
+import streamlit.components.v1 as components
 import pandas as pd
 import numpy as np
 import pathlib
@@ -17,6 +18,7 @@ except ImportError:
 try:
     from lime.lime_text import LimeTextExplainer
     import matplotlib.pyplot as plt
+    import seaborn as sns
     LIME_AVAILABLE = True
 except ImportError:
     LIME_AVAILABLE = False
@@ -51,10 +53,8 @@ def init_sastrawi():
     stopword_factory = StopWordRemoverFactory()
     stopwords_list = stopword_factory.get_stop_words()
     
-    # Preserve negation
     negation_words = ['tidak', 'bukan', 'jangan', 'belum', 'kurang']
     stopwords_list = [w for w in stopwords_list if w not in negation_words]
-    
     return stemmer, stopwords_list
 
 @st.cache_resource
@@ -73,14 +73,27 @@ def load_model_selection_meta():
     return None
 
 @st.cache_resource
-def load_champion_model():
-    meta = load_model_selection_meta()
-    if meta:
-        model_name = meta.get('selected_model')
-        model_path = MODELS_DIR / f"{model_name}.pkl"
-        if model_path.exists():
-            return joblib.load(model_path), model_name
-    return None, None
+def load_model_by_name(model_name):
+    model_path = MODELS_DIR / f"{model_name}.pkl"
+    if model_path.exists():
+        return joblib.load(model_path)
+    return None
+
+@st.cache_resource
+def load_all_models():
+    # Load 3 main models for comparison
+    models = {}
+    for name in ["logistic_regression_type_tuned", "linear_svm_type_tuned", "xgboost_type_tuned"]:
+        m = load_model_by_name(name)
+        if not m:
+            # Fallback to baseline
+            baseline_name = name.replace("_type_tuned", "_baseline")
+            m = load_model_by_name(baseline_name)
+            if m:
+                models[baseline_name] = m
+        else:
+            models[name] = m
+    return models
 
 @st.cache_resource
 def load_xgb_mapping():
@@ -88,7 +101,7 @@ def load_xgb_mapping():
     if mapping_path.exists():
         with open(mapping_path, 'r') as f:
             mapping = json.load(f)
-            return {v: k for k, v in mapping.items()} # Reverse mapping
+            return {v: k for k, v in mapping.items()} 
     return None
 
 @st.cache_data
@@ -104,25 +117,29 @@ def load_json(path):
             return json.load(f)
     return None
 
-# Text Preprocessing Function
 def preprocess_text(text, stemmer, stopwords_list):
     if not SASTRAWI_AVAILABLE:
-        return text.lower() # Fallback
-        
-    # 1. Case Folding
+        return text.lower() 
     text = text.lower()
-    # 2. Cleansing
     text = re.sub(r'http\S+|www\.\S+', '', text)
     text = re.sub(r'@[A-Za-z0-9_]+', '', text)
     text = re.sub(r'#[A-Za-z0-9_]+', '', text)
     text = re.sub(r'[^a-zA-Z\s]', ' ', text)
     text = re.sub(r'\s+', ' ', text).strip()
-    # 3. Stopword Removal
     words = text.split()
     words = [w for w in words if w not in stopwords_list]
-    # 4. Stemming
     text = stemmer.stem(' '.join(words))
     return text
+
+def get_probabilities(model, X_vec):
+    if hasattr(model, "predict_proba"):
+        return model.predict_proba(X_vec)[0]
+    elif hasattr(model, "decision_function"):
+        dec = model.decision_function(X_vec)[0]
+        # Simulate probabilities using softmax
+        exp_d = np.exp(dec - np.max(dec))
+        return exp_d / np.sum(exp_d)
+    return None
 
 # ==========================================
 # 3. PAGE LOGIC
@@ -134,7 +151,6 @@ def render_home():
     st.markdown("---")
     
     col1, col2 = st.columns([2, 1])
-    
     with col1:
         st.markdown("""
         ### Research Objective
@@ -143,16 +159,6 @@ def render_home():
         
         The goal is to automatically detect and classify Indonesian text into specific categories of cyberbullying to assist in digital moderation and linguistic research.
         """)
-        
-        st.markdown("""
-        ### The Machine Learning Pipeline
-        1. **Input**: Raw Indonesian Text
-        2. **Preprocessing**: Case folding, URL/Mention removal, Sastrawi Stemming, Negation-preserved Stopword Removal.
-        3. **Feature Extraction**: TF-IDF (Term Frequency - Inverse Document Frequency) with N-Grams.
-        4. **Modeling**: Logistic Regression, LinearSVC, and XGBoost (Baseline & Tuned).
-        5. **Output**: Cyberbullying Category Prediction & Interpretability.
-        """)
-        
     with col2:
         st.info("### Quick Stats")
         meta = load_model_selection_meta()
@@ -163,32 +169,24 @@ def render_home():
         else:
             st.warning("Model Selection data not available. Please complete Stage 09.")
             
-        st.markdown("**Status:** Research Pipeline Completed.")
-
 def render_eda():
     st.title("📊 Exploratory Data Analysis (EDA)")
-    st.markdown("Overview of the dataset structure and text characteristics before modeling.")
     st.markdown("---")
-    
-    # Try loading metadata to show current shape
     df_train = load_csv(TFIDF_DIR / "train_metadata.csv")
     if df_train is not None:
         st.success(f"Dataset active. Training samples: {len(df_train):,}")
         st.dataframe(df_train.head(5))
     else:
-        st.info("EDA Artifacts are currently being processed or unavailable. Please complete Stage 02 and 06.")
+        st.info("EDA Artifacts are currently being processed or unavailable.")
 
 def render_performance():
     st.title("📈 Model Performance & Evaluation")
-    st.markdown("Comparing Baseline vs. Tuned models on unseen Test Data.")
     st.markdown("---")
-    
     meta = load_model_selection_meta()
     if not meta:
         st.warning("Evaluation artifacts not found. Run `09_model_evaluation.ipynb` first.")
         return
         
-    st.header("🏆 The Champion Model")
     col1, col2 = st.columns(2)
     with col1:
         st.metric("Model Name", meta.get('selected_model', 'Unknown'))
@@ -197,8 +195,6 @@ def render_performance():
         st.metric("Test F1-Macro Score", f"{f1:.4f}")
         
     st.markdown("---")
-    st.subheader("Model Comparison Leaderboard")
-    
     eval_df = load_csv(REPORTS_DIR / "model_evaluation_metrics.csv")
     if eval_df is not None:
         st.dataframe(eval_df.style.highlight_max(subset=['F1_Macro', 'Accuracy'], color='lightgreen'))
@@ -206,133 +202,142 @@ def render_performance():
         st.info("Comparison leaderboard not available.")
 
 def render_prediction():
-    st.title("🔮 Live Cyberbullying Prediction")
-    st.markdown("Test the champion model against real-world Indonesian text.")
+    st.title("🔬 Deep Live Prediction & Explainability Analysis")
+    st.markdown("Analisis mendalam teks menggunakan **perbandingan 3 model sekaligus** dan bedah kata (XAI LIME).")
     st.markdown("---")
     
-    model, model_name = load_champion_model()
+    models = load_all_models()
     vectorizer = load_tfidf_vectorizer()
     stemmer, stopwords = init_sastrawi()
     xgb_mapping = load_xgb_mapping()
+    meta = load_model_selection_meta()
     
-    if not model or not vectorizer:
-        st.error("Missing Model or TF-IDF Vectorizer artifacts. Cannot perform prediction.")
+    if not models or not vectorizer:
+        st.error("Missing Models or Vectorizer.")
         return
         
-    if not SASTRAWI_AVAILABLE:
-        st.warning("Sastrawi library not found. Preprocessing will be degraded (lowercase only).")
+    champ_model_name = meta.get('selected_model') if meta else list(models.keys())[0]
     
     with st.form("prediction_form"):
         user_input = st.text_area("Masukkan teks Bahasa Indonesia untuk dianalisis...", height=100)
-        submitted = st.form_submit_button("Analyze Text")
+        submitted = st.form_submit_button("Analisis Mendalam 🚀")
         
     if submitted:
         if not user_input.strip():
             st.error("Teks tidak boleh kosong!")
             return
             
-        with st.spinner("Analyzing text..."):
-            # 1. Preprocess
+        with st.spinner("Memproses teks, menjalankan komputasi 3 model, dan membangun LIME Explainer..."):
             clean_text = preprocess_text(user_input, stemmer, stopwords)
-            
-            # 2. Vectorize
             X_vec = vectorizer.transform([clean_text])
             
-            # 3. Predict
-            pred_raw = model.predict(X_vec)[0]
+            # --- 1. MODEL COMPARISON ---
+            st.subheader("1. Perbandingan Keputusan Model")
+            st.info(f"**Teks setelah dibersihkan (Preprocessed):** '{clean_text}'")
             
-            # Map back if XGBoost
-            if 'xgboost' in model_name.lower() and xgb_mapping:
-                predicted_class = xgb_mapping.get(pred_raw, str(pred_raw))
-            else:
-                predicted_class = pred_raw
+            comp_data = []
+            for m_name, m in models.items():
+                pred_raw = m.predict(X_vec)[0]
+                is_xgb = 'xgboost' in m_name.lower()
                 
-            # 4. Probabilities
-            probs = None
-            classes = None
-            if hasattr(model, "predict_proba"):
-                probs = model.predict_proba(X_vec)[0]
-                if 'xgboost' in model_name.lower() and xgb_mapping:
-                    classes = [xgb_mapping.get(i, str(i)) for i in range(len(probs))]
+                # Class Mapping
+                if is_xgb and xgb_mapping:
+                    predicted_class = xgb_mapping.get(pred_raw, str(pred_raw))
+                    classes = [xgb_mapping.get(i, str(i)) for i in range(len(xgb_mapping))]
                 else:
-                    classes = model.classes_
+                    predicted_class = pred_raw
+                    classes = list(m.classes_)
                     
-        # 5. Display Result
-        st.markdown("### Hasil Analisis")
-        st.info(f"**Cleaned Text Internal:** '{clean_text}'")
-        
-        # Color coding based on prediction (assuming 'Non-bullying' might be a class)
-        if str(predicted_class).lower() in ['non-bullying', 'bukan bullying', 'not bullying']:
-            st.success(f"**Prediksi Kategori:** {predicted_class}")
-        else:
-            st.error(f"**Prediksi Kategori:** {predicted_class} 🚩")
+                # Probs
+                probs = get_probabilities(m, X_vec)
+                confidence = f"{np.max(probs)*100:.2f}%" if probs is not None else "N/A"
+                
+                is_champ = "🏆 Champion" if m_name == champ_model_name else ""
+                comp_data.append({
+                    "Model": f"{m_name} {is_champ}",
+                    "Prediksi Kelas": predicted_class,
+                    "Confidence": confidence
+                })
+                
+            comp_df = pd.DataFrame(comp_data)
+            st.table(comp_df)
             
-        if probs is not None and classes is not None:
-            st.markdown("**Tingkat Keyakinan (Probabilitas):**")
-            prob_df = pd.DataFrame({'Kategori': classes, 'Probabilitas': probs})
-            prob_df = prob_df.sort_values(by='Probabilitas', ascending=False)
+            # --- 2. XAI LIME ANALYSIS (On Champion Model) ---
+            st.markdown("---")
+            st.subheader(f"2. Analisis LIME (Model Pemenang: `{champ_model_name}`)")
             
-            st.bar_chart(prob_df.set_index('Kategori'))
+            if LIME_AVAILABLE and len(clean_text.split()) > 0:
+                champ_model = models.get(champ_model_name, list(models.values())[0])
+                is_xgb_champ = 'xgboost' in champ_model_name.lower()
+                
+                if is_xgb_champ and xgb_mapping:
+                    class_names = [xgb_mapping.get(i, str(i)) for i in range(len(xgb_mapping))]
+                else:
+                    class_names = list(champ_model.classes_)
+                
+                # LIME needs a pipeline function
+                def lime_pipeline(texts):
+                    X = vectorizer.transform(texts)
+                    if hasattr(champ_model, "predict_proba"):
+                        return champ_model.predict_proba(X)
+                    else:
+                        # Fallback for SVM
+                        dec = champ_model.decision_function(X)
+                        exp_d = np.exp(dec - np.max(dec, axis=1, keepdims=True))
+                        return exp_d / np.sum(exp_d, axis=1, keepdims=True)
+
+                explainer = LimeTextExplainer(class_names=class_names)
+                # Explain the cleaned text
+                exp = explainer.explain_instance(clean_text, lime_pipeline, num_features=10, top_labels=1)
+                pred_label_idx = exp.available_labels()[0]
+                pred_label_name = class_names[pred_label_idx]
+                
+                st.markdown(f"**Prediksi Akhir Model Pemenang:** `{pred_label_name}`")
+                
+                # Render HTML LIME in Streamlit
+                components.html(exp.as_html(), height=350, scrolling=True)
+                
+                # Render Bar Chart
+                st.markdown("### Beban Kata (Feature Weights)")
+                st.write(f"Grafik di bawah menunjukkan kata apa yang mendorong model memprediksi **{pred_label_name}** (Positif/Biru) dan kata apa yang justru membantah prediksi tersebut (Negatif/Oranye).")
+                
+                word_weights = exp.as_list(label=pred_label_idx)
+                if word_weights:
+                    df_weights = pd.DataFrame(word_weights, columns=['Kata', 'Bobot'])
+                    df_weights['Arah'] = df_weights['Bobot'].apply(lambda x: 'Mendukung Prediksi' if x > 0 else 'Membantah Prediksi')
+                    
+                    fig, ax = plt.subplots(figsize=(8, max(4, len(df_weights)*0.5)))
+                    sns.barplot(data=df_weights, x='Bobot', y='Kata', hue='Arah', palette={'Mendukung Prediksi': 'royalblue', 'Membantah Prediksi': 'coral'}, ax=ax)
+                    ax.set_title(f"Kontribusi Kata terhadap prediksi '{pred_label_name}'")
+                    st.pyplot(fig)
+            elif len(clean_text.split()) == 0:
+                st.warning("Teks setelah di-preprocessing kosong (semua kata dibuang karena dianggap tidak bermakna/stopword).")
+            else:
+                st.warning("Library LIME tidak tersedia. Harap install dengan `pip install lime`.")
 
 def render_error_analysis():
     st.title("🕵️ Error Analysis")
-    st.markdown("Investigating the blind spots of the champion model.")
     st.markdown("---")
-    
     error_summary = load_json(ERROR_DIR / "error_analysis_summary.json")
     if error_summary:
         col1, col2, col3 = st.columns(3)
         col1.metric("Overall Error Rate", f"{error_summary.get('overall_error_rate_percent')}%")
         col2.metric("Highest Error Class", error_summary.get('highest_error_class'))
         col3.metric("High-Confidence Errors", error_summary.get('high_confidence_errors_count'))
-    
-    st.subheader("Confusion Pairs (Most confused classes)")
-    conf_pairs = load_csv(ERROR_DIR / "confusion_pairs.csv")
-    if conf_pairs is not None:
-        st.dataframe(conf_pairs.head(10))
-    else:
-        st.info("Artifacts not found. Run `10_error_analysis.ipynb`.")
-        
-    st.subheader("Potential Annotation Issues (High-Confidence Errors)")
-    anno_issues = load_csv(ERROR_DIR / "potential_annotation_issues_for_review.csv")
-    if anno_issues is not None:
-        st.dataframe(anno_issues)
 
 def render_explainability():
-    st.title("🧠 Explainable AI (XAI)")
-    st.markdown("Understanding *why* the model makes its decisions by decoding TF-IDF matrices.")
+    st.title("🧠 Global Explainability")
     st.markdown("---")
-    
-    st.header("Global Explainability")
-    st.markdown("What words broadly influence the model?")
-    
     try:
         global_img = Image.open(EXPLAIN_DIR / "top_words_per_class.png")
         st.image(global_img, caption="Top influential words per class")
     except FileNotFoundError:
         st.info("Global word visualization not available. Run `11_explainability.ipynb`.")
-        
-    class_imp = load_csv(EXPLAIN_DIR / "class_feature_importance.csv")
-    if class_imp is not None:
-        with st.expander("View Raw Importance Weights DataFrame"):
-            st.dataframe(class_imp)
 
 def render_about():
     st.title("ℹ️ About the Research")
     st.markdown("---")
-    st.markdown("""
-    ### Methodology
-    This project strictly adheres to a classical Machine Learning NLP pipeline:
-    - **Representation**: TF-IDF was chosen for its interpretability and robust performance on domain-specific vocabulary compared to dense embeddings.
-    - **Models**: Explored both Linear architectures (for speed and exact weight mapping) and Tree-based architectures (XGBoost) for complex non-linear feature interactions.
-    - **Validation**: Stratified K-Fold Cross Validation was used to ensure the metrics are reliable across imbalanced classes.
-    
-    ### Limitations
-    - **Context Blindness**: Because the feature extraction relies on TF-IDF N-grams, the model struggles with complex sarcasm or long-distance semantic dependencies that a Transformer (like IndoBERT) might catch.
-    - **Static Vocabulary**: Words that were not present in the training set will simply be ignored during live prediction (Out of Vocabulary problem).
-    
-    *Built with Streamlit & Scikit-Learn.*
-    """)
+    st.markdown("This project strictly adheres to a classical Machine Learning NLP pipeline using TF-IDF.")
 
 # ==========================================
 # 4. APP ROUTING
@@ -345,18 +350,16 @@ def main():
         "🏠 Home / Overview": render_home,
         "📊 EDA Dashboard": render_eda,
         "📈 Model Performance": render_performance,
-        "🔮 Cyberbullying Prediction": render_prediction,
+        "🔮 Prediction & XAI": render_prediction,
         "🕵️ Error Analysis": render_error_analysis,
-        "🧠 Explainability": render_explainability,
+        "🧠 Global Explainability": render_explainability,
         "ℹ️ About the Research": render_about
     }
     
     selection = st.sidebar.radio("Go to", list(pages.keys()))
-    
     st.sidebar.markdown("---")
     st.sidebar.caption("Research Pipeline Demo")
     
-    # Execute selected page
     pages[selection]()
 
 if __name__ == "__main__":
