@@ -95,21 +95,31 @@ Berikut adalah hasil uji silang komprehensif dari semua algoritma yang diuji. Li
 | 4 | **XGBoost** (Tuned) | 62.63% | 81.17% | 75.70% | 58.14% |
 | 5 | **XGBoost** (Baseline) | 61.35% | 80.76% | 75.04% | 56.87% |
 
-*Catatan: XGBoost mencetak skor akurasi (81%) tertinggi karena secara brutal menebak kelas mayoritas (Normal), namun gagal total membedakan kelas minoritas (Recall 56.8%), yang menyebabkannya terlempar dari peringkat atas metrik objektif F1-Macro.*
+### 4.2 Diskusi Komparatif Algoritma (Model Benchmarking Analysis)
+Jika kita membedah tabel komparasi di atas secara mikroskopis, terdapat beberapa fenomena *Machine Learning* yang sangat menarik dan krusial:
 
-### 4.2 Analisis Kemenangan Algoritma & Matriks Kebingungan
-Perolehan F1-Macro Score sebesar ~66.8% membuktikan bahwa model Linear SVM mampu menyeimbangkan prediksi pada kelas mayoritas dan minoritas dengan presisi yang sangat baik dibandingkan XGBoost. Tabiat bawaan Linear SVM terlahir untuk menembus matriks *sparse*. Di tengah 60.000 kolom kata, model ini mampu melacak batas margin pemisah dengan efisiensi yang nyaris sempurna tanpa mengalami *overfitting*.
+1. **Paradoks Akurasi vs. Objektivitas Kelas (Kasus XGBoost)**  
+   Sekilas, XGBoost (*Tuned*) tampak memiliki skor **Akurasi tertinggi (81.17%)**. Namun, mengapa ia berada di peringkat terbawah? Hal ini disebabkan oleh sifat dasar dataset perundungan yang *Imbalanced* (berat sebelah). XGBoost cenderung mengambil "jalan pintas" secara probabilistik dengan menebak mayoritas kalimat sebagai kelas dominan (misal: *Normal* atau *Aman*). Strategi ini meledakkan skor Akurasi keseluruhan, namun menghancurkan nilai **Recall (58.14%)**. Artinya, banyak sekali kalimat pelecehan/ancaman berbahaya (*minoritas*) yang gagal dideteksi oleh XGBoost dan dibiarkan lolos. Dalam konteks sistem moderasi konten nyata, ini adalah kegagalan fatal.
+
+2. **Sensitivitas Berlebih (Kasus Logistic Regression)**  
+   Kebalikan dari XGBoost, *Logistic Regression* (khususnya varian *Baseline*) mencetak skor **Recall tertinggi (72.27%)**. Algoritma ini sangat "paranoia" dan sensitif. Ia berhasil menjaring hampir seluruh varian kalimat yang berpotensi perundungan (sangat sedikit kebobolan). Namun komprominya, **Precision**-nya terkorbankan (turun ke 62.67%). Hal ini berarti terjadi banyak kasus *False Positive*, di mana kalimat yang sebenarnya hanya candaan biasa ikut terhapus atau diblokir oleh sistem karena dianggap agresif.
+
+3. **Sang Pemenang: Keseimbangan Ekstrem (Linear SVM)**  
+   Inilah alasan mengapa **Linear SVM** dinobatkan sebagai arsitektur juara. Linear SVM tidak menjuarai *Accuracy* murni (79.56%), dan juga tidak menjuarai *Recall* (66.70%). Akan tetapi, algoritma ini menawarkan titik ekuilibrium (keseimbangan) **F1-Macro (66.87%)** yang paling sehat antara sensitivitas dan kepresisian. SVM berhasil menarik *hyperplane* pembatas antar-kelas pada dimensi matriks TF-IDF secara proporsional. Ia tidak mengabaikan kelas minoritas, namun juga tidak terlalu sensitif menghukum kelas candaan normal. 
+
+### 4.3 Matriks Kebingungan (Confusion Matrix)
+Visualisasi berikut membuktikan performa Linear SVM. Konsentrasi warna pada diagonal vertikal membuktikan bahwa SVM cukup percaya diri meletakkan prediksi pada kelas yang tepat, tanpa mengalami kebutaan total pada kelas minoritas berukuran sangat kecil seperti *Threat* (Ancaman).
 
 ![Confusion Matrix - Linear SVM](reports/confusion_matrix_linear_svm_baseline.png)
 *Gambar 1: Matriks Kebingungan (Confusion Matrix) Linear SVM.*
 
-### 4.3 Analisis Kesalahan (Error Analysis)
+### 4.4 Analisis Kesalahan (Error Analysis)
 Setiap model di-interogasi objektivitasnya. Visualisasi distribusi kesalahan (Error Analysis) di bawah mengidentifikasi dengan jelas area leksikal di mana kecerdasan buatan masih mengalami kesulitan membedakan sarkasme ganda.
 
 ![Error Rate by Class](reports/error_analysis/error_rate_by_class.png)
 *Gambar 2: Peta Distribusi Kesalahan Prediksi.*
 
-### 4.4 Interpretasi Model (LIME Explainability)
+### 4.5 Interpretasi Model (LIME Explainability)
 LIME diimplementasikan untuk membongkar organ pemikiran mesin. Gambar di bawah membuktikan secara logis kata spesifik apa saja yang memicu model untuk menjatuhkan vonis klasifikasi perundungan.
 
 ![Top Words per Class](reports/explainability/top_words_per_class.png)
